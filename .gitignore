@@ -1,0 +1,13 @@
+# Byte-compiled
+__pycache__
+__pycache__/
+**/__pycache__/
+
+# Environments
+.venv
+.venv/
+.env
+
+# Log Files
+app.log
+
