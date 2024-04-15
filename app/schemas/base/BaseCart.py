@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, \
     List
 from pydantic import BaseModel, Field, ValidationError, condecimal
 from pydantic.json import pydantic_encoder
+from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
 # from decimal import Decimal
 from faker import Faker
@@ -22,47 +23,55 @@ from faker import Faker
 fake = Faker()
 
 class BaseCart(BaseModel):
-    _id: Optional[str] = Field(
+    id: Optional[Union[PydanticObjectId, str]] = Field(
             default=None,
+            alias="_id",
             description="_id"
         )
     # product_id: Optional[str] = Field(
     #         default=None, 
+    #         alias="product_id",
     #         description="product_id"
     #     )
     # user_id: Optional[str] = Field(
     #         default=None, 
+    #         alias="user_id",
     #         description="user_id"
     #     )
     qty: Optional[int] = Field(
             default=0, 
+            alias="qty",
             description="qty"
         )
     created_at: Optional[datetime] = Field(
             default=None, 
+            alias="created_at",
             description="created_at"
         )
     updated_at: Optional[datetime] = Field(
             default=None, 
+            alias="updated_at",
             description="updated_at"
         )
     ip_address: Optional[str] = Field(
             default=None, 
+            alias="ip_address",
             description="ip_address"
         )
 
     class Config:
         # pass
-        # populate_by_name = True
-        allow_population_by_field_name = True
-        json_encoders = {
-            # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-            # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-            # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        }
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
+        # json_encoders = {
+        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+        # }
         json_schema_extra = {
             "example": {
-                "_id": str(fake.uuid4()),
+                "id": str(fake.uuid4()),
                 # "product_id": str(fake.uuid4()),
                 # "user_id": str(fake.uuid4()),
                 "qty": fake.random_int(min=100, max=1000),

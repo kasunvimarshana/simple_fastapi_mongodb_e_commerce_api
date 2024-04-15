@@ -8,6 +8,7 @@
 # from typing import TYPE_CHECKING
 from pydantic import BaseModel, Field, ValidationError, condecimal
 # from pydantic.json import pydantic_encoder
+# from beanie import PydanticObjectId
 # from datetime import datetime, timezone, timedelta, date
 
 class MongoSchema(BaseModel):
@@ -40,9 +41,13 @@ class MongoSchema(BaseModel):
     class Config:
         pass
         # from_attributes = True # orm_mode = True
+        # populate_by_name = True
+        # arbitrary_types_allowed = True # required for the _id
+        # use_enum_values = True
         # json_encoders = {
         #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
         #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
         # }
 
 # MongoSchema.update_forward_refs()

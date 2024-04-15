@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, \
     List
 from pydantic import BaseModel, Field, ValidationError, condecimal
 from pydantic.json import pydantic_encoder
+from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
 # from decimal import Decimal
 from faker import Faker
@@ -26,14 +27,16 @@ fake = Faker()
 
 class Review(BaseReview):
     # pass
-    user: Optional[Union[BaseUser, dict]] = Field(
-            default=None, 
-            description="user"
-        )
-    product: Optional[Union[BaseProduct, dict]] = Field(
-            default=None, 
-            description="product"
-        )
+    # user: Optional[Union[BaseUser, dict, Any]] = Field(
+    #         default=None, 
+    #         alias="user",
+    #         description="user"
+    #     )
+    # product: Optional[Union[BaseProduct, dict, Any]] = Field(
+    #         default=None,
+    #         alias="product", 
+    #         description="product"
+    #     )
     
 
     class Config(BaseReview.Config):
@@ -41,13 +44,14 @@ class Review(BaseReview):
         base_review_schema = BaseReview.Config.json_schema_extra["example"]
         base_user_schema = BaseUser.Config.json_schema_extra["example"]
         base_product_schema = BaseProduct.Config.json_schema_extra["example"]
-        # populate_by_name = True
-        allow_population_by_field_name = True
-        json_encoders = {
-            # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-            # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-            # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        }
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
+        # json_encoders = {
+        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+        # }
         json_schema_extra = {
             "example": {
                 **base_review_schema,

@@ -8,7 +8,7 @@ import asyncio as asyncio
 # from typing import TYPE_CHECKING
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo.errors import ServerSelectionTimeoutError
-from app.utils.Logger import Logger
+from app.utils.Logger import Logger as Logger
 from .Setting import Setting as Setting
 
 class MongoDB:

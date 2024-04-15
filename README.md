@@ -21,6 +21,11 @@ python -m venv .venv
 pip freeze > requirements.txt
 ```
 
+```bash
+# install the dependencies
+pip install -r requirements.txt
+```
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)

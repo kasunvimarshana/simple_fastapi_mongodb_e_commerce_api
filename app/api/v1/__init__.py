@@ -22,9 +22,3 @@
 # #     )
 # '''
 """
-
-from . import health_routes as health_routes
-
-__all__ = list(
-    "health_routes"
-)

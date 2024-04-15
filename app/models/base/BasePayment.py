@@ -22,44 +22,50 @@ from faker import Faker
 fake = Faker()
 
 class BasePayment(Document):
-    # _id: Optional[UUID] = Field(
+    # id: Optional[UUID] = Field(
     #         # default=None, 
-    #         description="_id", 
+    #         alias="_id",
+    #         description="_id"
     #         default_factory=uuid4
     #     )
-    # _id: Optional[PydanticObjectId] = Field(
-    #         default=None, 
-    #         description="_id"
-    #     )
-    _id: Optional[PydanticObjectId] = None
+    id: Optional[PydanticObjectId] = Field(
+            default=None, 
+            alias="_id",
+            description="_id"
+        )
     # order_id: Optional[PydanticObjectId] = Field(
     #         default=None, 
+    #         alias="order_id",
     #         description="order_id"
     #     )
     amount: Optional[Decimal] = Field(
             default=Decimal(0.0), 
+            alias="amount",
             description="amount"
         ) # Optional[float]
     created_at: Optional[datetime] = Field(
             # default=None, 
+            alias="created_at",
             description="created_at", 
             default_factory=datetime.now
         )
     updated_at: Optional[datetime] = Field(
             # default=None, 
+            alias="updated_at",
             description="updated_at", 
             default_factory=datetime.now
         )
     remark: Optional[str] = Field(
             default=None, 
+            alias="remark",
             description="remark"
         )
 
     @before_event(Insert)
     async def before_insert(self):
-        # # Generate _id if not provided
-        # if not self._id:
-        #     self._id = str(uuid.uuid4())
+        # # Generate id if not provided
+        # if not self.id:
+        #     self.id = str(uuid.uuid4())
 
         # Generate created_at if not provided
         if not self.created_at:
@@ -71,16 +77,60 @@ class BasePayment(Document):
         if not self.updated_at:
             self.updated_at = datetime.now(timezone.utc)
 
+    '''
+    # def __init__(self, **kwargs):
+    #     super().__init__(**kwargs)
+    #     for key, value in kwargs.items():
+    #         setattr(self, key, value)
+
+    # def __new__(cls, *args, **kwargs):
+    #     instance = super().__new__(cls)
+    #     # instance.__init__(*args, **kwargs)
+    #     return instance
+    '''
+
+    def __repr__(self) -> str:
+        class_name = self.__class__.__name__
+        result = f"<{class_name} {getattr(self, 'id', '')}>"
+        return result
+
+    def __str__(self) -> str:
+        return str(getattr(self, 'id', ''))
+
+    def __hash__(self) -> int:
+        return hash(getattr(self, 'id', ''))
+
+    def __eq__(self, other: object) -> bool:
+        '''
+        # if isinstance(other, self.__class__):
+        #     for attr_name in self.__dict__:
+        #         if getattr(self, attr_name) != getattr(other, attr_name):
+        #             return False
+        #     return True
+        # return False
+        '''
+        if isinstance(other, self.__class__):
+            return getattr(self, 'id', '') == getattr(other, 'id', '')
+        return False
+
     class Settings:
         name = "payments"
         is_root = True
-        max_nesting_depth = 1
+        # max_nesting_depth = 1
         # max_nesting_depths_per_field = {}
 
     class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
+        # json_encoders = {
+        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+        # }
         json_schema_extra = {
             "example": {
-                "_id": str(PydanticObjectId(str(ObjectId()))),
+                "id": str(PydanticObjectId(str(ObjectId()))),
                 # "order_id": str(PydanticObjectId(str(ObjectId()))),
                 "amount": Decimal(fake.pydecimal(min_value=10, max_value=1000, right_digits=2)),
                 "created_at": datetime.now(timezone.utc), # datetime.now(timezone.utc).replace(tzinfo=None) # fake.date_time_between(start_date='-1y', end_date='now')

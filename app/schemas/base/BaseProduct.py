@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, \
     List
 from pydantic import BaseModel, Field, ValidationError, condecimal
 from pydantic.json import pydantic_encoder
+from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from faker import Faker
@@ -22,59 +23,70 @@ from faker import Faker
 fake = Faker()
 
 class BaseProduct(BaseModel):
-    _id: Optional[str] = Field(
+    id: Optional[Union[PydanticObjectId, str]] = Field(
             default=None,
+            alias="_id",
             description="_id"
         )
     sku: Optional[str] = Field(
             default=None, 
+            alias="sku",
             description="sku"
         )
     name: Optional[str] = Field(
             default=None, 
+            alias="name",
             description="name"
         )
     qty_in_stock: Optional[int] = Field(
-            default=0, 
+            default=0,
+            alias="qty_in_stock", 
             description="qty_in_stock"
         )
     price: Optional[Decimal] = Field(
             default=Decimal(0.0), 
+            alias="price",
             description="price"
         ) # Optional[condecimal(decimal_places=2, max_digits=10)] # Optional[float]
     image: Optional[str] = Field(
             default=None, 
+            alias="image",
             description="image"
         )
     created_at: Optional[datetime] = Field(
             default=None, 
+            alias="created_at",
             description="created_at"
         )
     updated_at: Optional[datetime] = Field(
             default=None, 
+            alias="updated_at",
             description="updated_at"
         )
     # ip_address: Optional[str] = Field(
     #         default=None, 
+    #         alias="ip_address",
     #         description="ip_address"
     #     )
     remark: Optional[str] = Field(
             default=None, 
+            alias="remark",
             description="remark"
         )
 
     class Config:
         # pass
-        # populate_by_name = True
-        allow_population_by_field_name = True
-        json_encoders = {
-            # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-            # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-            # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        }
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
+        # json_encoders = {
+        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+        # }
         json_schema_extra = {
             "example": {
-                "_id": str(fake.uuid4()),
+                "id": str(fake.uuid4()),
                 "sku": str(fake.uuid4()), # fake.uuid4().hex[:12],
                 "name": fake.word(),
                 "qty_in_stock": fake.random_int(min=0, max=100),

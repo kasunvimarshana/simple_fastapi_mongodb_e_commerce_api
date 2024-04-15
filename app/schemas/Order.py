@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, \
     List
 from pydantic import BaseModel, Field, ValidationError, condecimal
 from pydantic.json import pydantic_encoder
+from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
 # from decimal import Decimal
 from faker import Faker
@@ -27,20 +28,23 @@ fake = Faker()
 
 class Order(BaseOrder):
     # pass
-    user: Optional[Union[BaseUser, dict]] = Field(
+    user: Optional[Union[BaseUser, dict, Any]] = Field(
             default=None, 
+            alias="user",
             description="user"
         )
-    order_items: Optional[List[Union[BaseOrderItem, dict]]] = Field(
-            default=None, 
-            description="order_items", 
-            original_field="order"
-        )
-    payments: Optional[List[Union[BasePayment, dict]]] = Field(
-            default=None, 
-            description="payments", 
-            original_field="order"
-        )
+    # order_items: Optional[List[Union[BaseOrderItem, dict, Any]]] = Field(
+    #         default=None, 
+    #         alias="order_items",
+    #         description="order_items", 
+    #         original_field="order"
+    #     )
+    # payments: Optional[List[Union[BasePayment, dict, Any]]] = Field(
+    #         default=None, 
+    #         alias="payments",
+    #         description="payments", 
+    #         original_field="order"
+    #     )
     
 
     class Config(BaseOrder.Config):
@@ -49,13 +53,14 @@ class Order(BaseOrder):
         base_user_schema = BaseUser.Config.json_schema_extra["example"]
         base_order_item_schema = BaseOrderItem.Config.json_schema_extra["example"]
         base_payment_schema = BasePayment.Config.json_schema_extra["example"]
-        # populate_by_name = True
-        allow_population_by_field_name = True
-        json_encoders = {
-            # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-            # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-            # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        }
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
+        # json_encoders = {
+        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+        # }
         json_schema_extra = {
             "example": {
                 **base_order_schema,

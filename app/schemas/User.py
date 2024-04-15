@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, \
     List
 from pydantic import BaseModel, Field, ValidationError, condecimal
 from pydantic.json import pydantic_encoder
+from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
 # from decimal import Decimal
 from faker import Faker
@@ -28,26 +29,30 @@ fake = Faker()
 
 class User(BaseUser):
     # pass
-    carts: Optional[List[Union[BaseCart, dict]]] = Field(
-            default=None, 
-            description="carts", 
-            original_field="user"
-        )
-    orders: Optional[List[Union[BaseOrder, dict]]] = Field(
-            default=None, 
-            description="orders", 
-            original_field="user"
-        )
-    payments: Optional[List[Union[BasePayment, dict]]] = Field(
-            default=None, 
-            description="payments", 
-            original_field="user"
-        )
-    reviews: Optional[List[Union[BaseReview, dict]]] = Field(
-            default=None, 
-            description="reviews", 
-            original_field="user"
-        )
+    # carts: Optional[List[Union[BaseCart, dict, Any]]] = Field(
+    #         default=None, 
+    #         alias="carts",
+    #         description="carts", 
+    #         original_field="user"
+    #     )
+    # orders: Optional[List[Union[BaseOrder, dict, Any]]] = Field(
+    #         default=None, 
+    #         alias="orders",
+    #         description="orders", 
+    #         original_field="user"
+    #     )
+    # payments: Optional[List[Union[BasePayment, dict, Any]]] = Field(
+    #         default=None, 
+    #         alias="payments",
+    #         description="payments", 
+    #         original_field="user"
+    #     )
+    # reviews: Optional[List[Union[BaseReview, dict, Any]]] = Field(
+    #         default=None, 
+    #         alias="reviews",
+    #         description="reviews", 
+    #         original_field="user"
+    #     )
     
 
     class Config(BaseUser.Config):
@@ -57,12 +62,17 @@ class User(BaseUser):
         base_order_schema = BaseOrder.Config.json_schema_extra["example"]
         base_payment_schema = BasePayment.Config.json_schema_extra["example"]
         base_review_schema = BaseReview.Config.json_schema_extra["example"]
-        # populate_by_name = True
-        allow_population_by_field_name = True
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
         json_encoders = {
             # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
             # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
             # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+            Optional[List[Union[BaseCart, dict, Any]]]: lambda x: None,
+            Optional[List[Union[BaseOrder, dict, Any]]]: lambda x: None,
+            Optional[List[Union[BasePayment, dict, Any]]]: lambda x: None,
+            Optional[List[Union[BaseReview, dict, Any]]]: lambda x: None,
         }
         json_schema_extra = {
             "example": {

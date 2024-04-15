@@ -19,10 +19,12 @@ from beanie import init_beanie
 from app.configs.database import connect_to_database, close_database_connection, get_database
 from app.errors.BadRequest import BadRequest
 from app.errors.UnprocessableError import UnprocessableError
-from app.utils.Logger import Logger
+from app.utils.Logger import Logger as Logger
+from app.configs.Setting import Setting as Setting
 # import routes
-from app.api.v1 import health_routes as health_routes
+from app.api.v1 import application_routes as application_routes
 from app.api.v1 import user_routes as user_routes
+from app.api.v1 import auth_routes as auth_routes
 # import models
 from app.models.User import User as UserModel
 from app.models.Review import Review as ReviewModel
@@ -33,6 +35,7 @@ from app.models.Order import Order as OrderModel
 from app.models.Cart import Cart as CartModel
  
 logging = Logger(__name__)
+settings = Setting()
 
 '''
 # @asynccontextmanager
@@ -87,8 +90,8 @@ def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
-        title="Title",
-        version="1.0.0",
+        title=settings.APP_NAME,
+        version=settings.APP_VERSION,
         routes=app.routes
     )
     app.openapi_schema = openapi_schema
@@ -129,17 +132,24 @@ async def unprocessable_error_handler(
 
 
 # # API Path
-# # # Health
+# # # Application
 app.include_router(
-    health_routes.router,
-    prefix="/v1",
-    tags=["health"]
+    application_routes.router,
+    prefix=settings.API_ROUTE_PREFIX,
+    tags=["application"]
+)
+
+# # # Auth
+app.include_router(
+    auth_routes.router,
+    prefix=settings.API_ROUTE_PREFIX,
+    tags=["auth"]
 )
 
 # # # User
 app.include_router(
     user_routes.router,
-    prefix="/v1",
+    prefix=settings.API_ROUTE_PREFIX,
     tags=["user"]
 )
 

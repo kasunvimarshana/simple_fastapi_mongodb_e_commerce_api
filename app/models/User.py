@@ -28,23 +28,27 @@ fake = Faker()
 
 class User(BaseUser):
     # pass
-    carts: Optional[List[BackLink[BaseCart]]] = Field(
-            default=None, 
-            description="carts", 
-            original_field="user"
-        )
-    orders: Optional[List[BackLink[BaseOrder]]] = Field(
-            default=None, 
-            description="orders", 
-            original_field="user"
-        )
-    payments: Optional[List[BackLink[BasePayment]]] = Field(
-            default=None, 
-            description="payments", 
-            original_field="user"
-        )
+    # carts: Optional[List[BackLink[BaseCart]]] = Field(
+    #         default=None, 
+    #         alias="carts",
+    #         description="carts", 
+    #         original_field="user"
+    #     )
+    # orders: Optional[List[BackLink[BaseOrder]]] = Field(
+    #         default=None, 
+    #         alias="orders",
+    #         description="orders", 
+    #         original_field="user"
+    #     )
+    # payments: Optional[List[BackLink[BasePayment]]] = Field(
+    #         default=None, 
+    #         alias="payments",
+    #         description="payments", 
+    #         original_field="user"
+    #     )
     reviews: Optional[List[BackLink[BaseReview]]] = Field(
             default=None, 
+            alias="reviews",
             description="reviews", 
             original_field="user"
         )
@@ -55,12 +59,14 @@ class User(BaseUser):
         base_order_schema = BaseOrder.Config.json_schema_extra["example"]
         base_payment_schema = BasePayment.Config.json_schema_extra["example"]
         base_review_schema = BaseReview.Config.json_schema_extra["example"]
-        '''
-        # populate_by_name = True
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
         # json_encoders = {
-        #     BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
         # }
-        '''
         json_schema_extra = {
             "example": {
                 **base_user_schema,

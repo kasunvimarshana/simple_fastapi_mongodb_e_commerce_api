@@ -28,10 +28,12 @@ class OrderItem(BaseOrderItem):
     # pass
     order: Optional[Link[BaseOrder]] = Field(
             default=None, 
+            alias="order",
             description="order"
         )
     product: Optional[Link[BaseProduct]] = Field(
             default=None, 
+            alias="product",
             description="product"
         )
 
@@ -39,12 +41,14 @@ class OrderItem(BaseOrderItem):
         base_order_item_schema = BaseOrderItem.Config.json_schema_extra["example"]
         base_order_schema = BaseOrder.Config.json_schema_extra["example"]
         base_product_schema = BaseProduct.Config.json_schema_extra["example"]
-        '''
-        # populate_by_name = True
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
         # json_encoders = {
-        #     BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
         # }
-        '''
         json_schema_extra = {
             "example": {
                 **base_order_item_schema,

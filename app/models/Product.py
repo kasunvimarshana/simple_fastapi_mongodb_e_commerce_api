@@ -27,6 +27,7 @@ class Product(BaseProduct):
     # pass
     reviews: Optional[List[BackLink[BaseReview]]] = Field(
             default=None, 
+            alias="reviews",
             description="reviews", 
             original_field="product"
         )
@@ -34,12 +35,14 @@ class Product(BaseProduct):
     class Config(BaseProduct.Config):
         base_product_schema = BaseProduct.Config.json_schema_extra["example"]
         base_review_schema = BaseReview.Config.json_schema_extra["example"]
-        '''
-        # populate_by_name = True
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
         # json_encoders = {
-        #     BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
         # }
-        '''
         json_schema_extra = {
             "example": {
                 **base_product_schema,
