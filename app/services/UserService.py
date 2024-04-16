@@ -18,9 +18,10 @@ from typing import TYPE_CHECKING, \
     Annotated, \
     List
 from fastapi import APIRouter, Request, Depends, HTTPException, status, Body, Query
-# import pymongo as pymongo
+import pymongo as pymongo
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from beanie import PydanticObjectId
+from beanie import PydanticObjectId, MergeStrategy
+from beanie import operators as operators
 from datetime import datetime, timezone
 import app.configs.database as database
 from app.configs.Setting import Setting as Setting
@@ -68,6 +69,7 @@ class UserService:
 
                         # user_instance = await UserModel.insert_one(user_instance, session=session)
                         user_instance = await user_instance.create(session=session)
+
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()
 
@@ -156,10 +158,7 @@ class UserService:
         ) -> Optional[UserSchema]:
             self.logger.debug("read_user_by_id called")
             try:
-                user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(id))
-                # =========
-                await user_instance.fetch_all_links()
-                # =========
+                user_instance = await UserModel.find_one(operators.Eq(UserModel.id, PydanticObjectId(id)))
                 if not user_instance:
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 

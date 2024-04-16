@@ -20,6 +20,7 @@ from beanie import PydanticObjectId, BackLink
 # from decimal import Decimal
 from faker import Faker
 from app.enums.UserRole import UserRole as UserRole
+from app.schemas.base.GeoObject import GeoObject
 
 fake = Faker()
 
@@ -59,27 +60,33 @@ class UserCreateRequest(BaseModel):
             alias="user_role",
             description="user_role"
         )
-    latitude: Optional[float] = Field(
+    # latitude: Optional[float] = Field(
+    #         default=None, 
+    #         alias="latitude",
+    #         description="latitude"
+    #     ) # coordinate that specifies the north–south position of a point on the surface of the Earth or another celestial body. Latitude is given as an angle that ranges from −90° at the south pole to 90° at the north pole, with 0° at the Equator
+    # longitude: Optional[float] = Field(
+    #         default=None, 
+    #         alias="longitude",
+    #         description="longitude"
+    #     ) # geographic coordinate that specifies the east–west position of a point on the surface of the Earth, or another celestial body. It is an angular measurement, usually expressed in degrees and denoted by the Greek letter lambda
+    geo: Optional[Union[GeoObject, dict]] = Field(
             default=None, 
-            alias="latitude",
-            description="latitude"
-        ) # coordinate that specifies the north–south position of a point on the surface of the Earth or another celestial body. Latitude is given as an angle that ranges from −90° at the south pole to 90° at the north pole, with 0° at the Equator
-    longitude: Optional[float] = Field(
-            default=None, 
-            alias="longitude",
-            description="longitude"
-        ) # geographic coordinate that specifies the east–west position of a point on the surface of the Earth, or another celestial body. It is an angular measurement, usually expressed in degrees and denoted by the Greek letter lambda
+            alias="geo",
+            description="geo"
+        )
 
     class Config:
         # pass
+        geo_object_schema = GeoObject.Config.json_schema_extra["example"]
         populate_by_name = True
         arbitrary_types_allowed = True # required for the _id
         use_enum_values = True
-        # json_encoders = {
-        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        # }
+        json_encoders = {
+            # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+            # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+            # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+        }
         json_schema_extra = {
             "example": {
                 "first_name": fake.first_name(),
@@ -89,8 +96,11 @@ class UserCreateRequest(BaseModel):
                 "phone_number": fake.phone_number(),
                 "image": fake.image_url(),
                 "user_role": fake.random_element(elements=[role.value for role in UserRole]),
-                "latitude": fake.latitude(),
-                "longitude": fake.longitude()
+                # "latitude": fake.latitude(),
+                # "longitude": fake.longitude(),
+                "geo": {
+                    **geo_object_schema
+                }
             }
         }
 

@@ -20,6 +20,7 @@ from datetime import datetime, timezone, timedelta
 # from decimal import Decimal
 from faker import Faker
 from app.enums.UserRole import UserRole as UserRole
+from .GeoObject import GeoObject as GeoObject
 
 fake = Faker()
 
@@ -76,16 +77,21 @@ class BaseUser(BaseModel):
             description="user_role",
             # validate_default=True
         )
-    latitude: Optional[float] = Field(
+    # latitude: Optional[float] = Field(
+    #         default=None, 
+    #         alias="latitude",
+    #         description="latitude"
+    #     ) # coordinate that specifies the north–south position of a point on the surface of the Earth or another celestial body. Latitude is given as an angle that ranges from −90° at the south pole to 90° at the north pole, with 0° at the Equator
+    # longitude: Optional[float] = Field(
+    #         default=None, 
+    #         alias="longitude",
+    #         description="longitude"
+    #     ) # geographic coordinate that specifies the east–west position of a point on the surface of the Earth, or another celestial body. It is an angular measurement, usually expressed in degrees and denoted by the Greek letter lambda
+    geo: Optional[Union[GeoObject, dict]] = Field(
             default=None, 
-            alias="latitude",
-            description="latitude"
-        ) # coordinate that specifies the north–south position of a point on the surface of the Earth or another celestial body. Latitude is given as an angle that ranges from −90° at the south pole to 90° at the north pole, with 0° at the Equator
-    longitude: Optional[float] = Field(
-            default=None, 
-            alias="longitude",
-            description="longitude"
-        ) # geographic coordinate that specifies the east–west position of a point on the surface of the Earth, or another celestial body. It is an angular measurement, usually expressed in degrees and denoted by the Greek letter lambda
+            alias="geo",
+            description="geo"
+        )
     ip_address: Optional[str] = Field(
             default=None, 
             alias="ip_address",
@@ -94,6 +100,7 @@ class BaseUser(BaseModel):
 
     class Config:
         # pass
+        geo_object_schema = GeoObject.Config.json_schema_extra["example"]
         populate_by_name = True
         arbitrary_types_allowed = True # required for the _id
         use_enum_values = True
@@ -114,9 +121,12 @@ class BaseUser(BaseModel):
                 "created_at": datetime.now(timezone.utc), # datetime.now(timezone.utc).replace(tzinfo=None) # fake.date_time_between(start_date='-1y', end_date='now')
                 "updated_at": datetime.now(timezone.utc), # datetime.now(timezone.utc).replace(tzinfo=None) # fake.date_time_between(start_date='-1y', end_date='now')
                 "user_role": fake.random_element(elements=[role.value for role in UserRole]),
-                "latitude": fake.latitude(),
-                "longitude": fake.longitude(),
-                "ip_address": fake.ipv4()
+                # "latitude": fake.latitude(),
+                # "longitude": fake.longitude(),
+                "ip_address": fake.ipv4(),
+                "geo": {
+                    **geo_object_schema
+                }
             }
         }
 

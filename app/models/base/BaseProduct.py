@@ -148,6 +148,12 @@ class BaseProduct(Document):
         # max_nesting_depth = 1
         # max_nesting_depths_per_field = {}
 
+    class Config:
+        # pass
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
+
 
 __all__ = [
     "BaseProduct"

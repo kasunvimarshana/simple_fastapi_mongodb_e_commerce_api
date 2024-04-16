@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, \
     Any, \
     Union, \
     List
-# import pymongo as pymongo
+import pymongo as pymongo
 from beanie import Document, Indexed, PydanticObjectId, Link, BackLink, before_event, after_event, Insert, Replace, Before, After
 from pydantic import Field, EmailStr
 from datetime import datetime, timezone
@@ -19,6 +19,7 @@ from bson import ObjectId
 from decimal import Decimal
 from faker import Faker
 from app.enums.UserRole import UserRole as UserRole
+from .GeoObject import GeoObject as GeoObject
 
 fake = Faker()
 
@@ -31,12 +32,9 @@ class BaseUser(Document):
     #     )
     # id: Optional[PydanticObjectId] = Field(
     #         default=None, 
-    #         # alias="id",
+    #         alias="id",
     #         description="id"
     #     )
-    id: Optional[PydanticObjectId] = Field(
-            default=None, description="MongoDB document ObjectID"
-        )
     first_name: Optional[str] = Field(
             default=None, 
             alias="first_name",
@@ -84,16 +82,21 @@ class BaseUser(Document):
             alias="user_role",
             description="user_role"
         )
-    latitude: Optional[float] = Field(
+    # latitude: Optional[float] = Field(
+    #         default=None, 
+    #         alias="latitude",
+    #         description="latitude"
+    #     ) # coordinate that specifies the north–south position of a point on the surface of the Earth or another celestial body. Latitude is given as an angle that ranges from −90° at the south pole to 90° at the north pole, with 0° at the Equator
+    # longitude: Optional[float] = Field(
+    #         default=None, 
+    #         alias="longitude",
+    #         description="longitude"
+    #     ) # geographic coordinate that specifies the east–west position of a point on the surface of the Earth, or another celestial body. It is an angular measurement, usually expressed in degrees and denoted by the Greek letter lambda
+    geo: Optional[Union[GeoObject, dict]] = Field(
             default=None, 
-            alias="latitude",
-            description="latitude"
-        ) # coordinate that specifies the north–south position of a point on the surface of the Earth or another celestial body. Latitude is given as an angle that ranges from −90° at the south pole to 90° at the north pole, with 0° at the Equator
-    longitude: Optional[float] = Field(
-            default=None, 
-            alias="longitude",
-            description="longitude"
-        ) # geographic coordinate that specifies the east–west position of a point on the surface of the Earth, or another celestial body. It is an angular measurement, usually expressed in degrees and denoted by the Greek letter lambda
+            alias="geo",
+            description="geo"
+        )
     ip_address: Optional[str] = Field(
             default=None, 
             alias="ip_address",
@@ -162,6 +165,15 @@ class BaseUser(Document):
         # is_root = True
         # max_nesting_depth = 1
         # max_nesting_depths_per_field = {}
+        indexes = [
+            [("geo", pymongo.GEOSPHERE)],  # GEO index
+        ]
+
+    class Config:
+        # pass
+        populate_by_name = True
+        arbitrary_types_allowed = True # required for the _id
+        use_enum_values = True
 
 
 __all__ = [
