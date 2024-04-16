@@ -24,15 +24,15 @@ fake = Faker()
 class BaseOrderItem(Document):
     # id: Optional[UUID] = Field(
     #         # default=None, 
-    #         alias="_id",
-    #         description="_id"
+    #         alias="id",
+    #         description="id"
     #         default_factory=uuid4
     #     )
-    id: Optional[PydanticObjectId] = Field(
-            default=None, 
-            alias="_id",
-            description="_id"
-        )
+    # id: Optional[PydanticObjectId] = Field(
+    #         default=None, 
+    #         alias="id",
+    #         description="id"
+    #     )
     # order_id: Optional[PydanticObjectId] = Field(
     #         default=None, 
     #         alias="order_id",
@@ -92,28 +92,10 @@ class BaseOrderItem(Document):
 
     class Settings:
         name = "order_items"
-        is_root = True
+        # is_root = True
         # max_nesting_depth = 1
         # max_nesting_depths_per_field = {}
 
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True # required for the _id
-        use_enum_values = True
-        # json_encoders = {
-        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        # }
-        json_schema_extra = {
-            "example": {
-                "id": str(PydanticObjectId(str(ObjectId()))),
-                # "order_id": str(PydanticObjectId(str(ObjectId()))),
-                # "product_id": str(PydanticObjectId(str(ObjectId()))),
-                "qty": fake.random_int(min=1, max=100),
-                "price": Decimal(fake.pydecimal(min_value=10, max_value=1000, right_digits=2))
-            }
-        }
 
 __all__ = [
     "BaseOrderItem"

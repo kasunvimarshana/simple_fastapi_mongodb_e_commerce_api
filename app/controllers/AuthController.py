@@ -58,9 +58,7 @@ class AuthController:
             current_user: Optional[Union[UserSchema, None]],
         ) -> Optional[UserSchema]:
             try:
-                print("====== controllrt ====", current_user)
                 temp_response = await self.auth_service.test_token(current_user)
-                print("====== controllrt temp_response ====", temp_response)
                 return temp_response
             except (HTTPException) as e:
                 raise e

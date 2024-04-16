@@ -24,15 +24,15 @@ fake = Faker()
 class BaseProduct(Document):
     # id: Optional[UUID] = Field(
     #         # default=None, 
-    #         alias="_id",
-    #         description="_id"
+    #         alias="id",
+    #         description="id"
     #         default_factory=uuid4
     #     )
-    id: Optional[PydanticObjectId] = Field(
-            default=None, 
-            alias="_id",
-            description="_id"
-        )
+    # id: Optional[PydanticObjectId] = Field(
+    #         default=None, 
+    #         alias="id",
+    #         description="id"
+    #     )
     sku: Optional[str] = Field(
             default=None, 
             alias="sku",
@@ -144,33 +144,10 @@ class BaseProduct(Document):
 
     class Settings:
         name = "products"
-        is_root = True
+        # is_root = True
         # max_nesting_depth = 1
         # max_nesting_depths_per_field = {}
 
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True # required for the _id
-        use_enum_values = True
-        # json_encoders = {
-        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        # }
-        json_schema_extra = {
-            "example": {
-                "id": str(PydanticObjectId(str(ObjectId()))),
-                "sku": str(fake.uuid4()), # fake.uuid4().hex[:12],
-                "name": fake.word(),
-                "qty_in_stock": fake.random_int(min=0, max=100),
-                "price": Decimal(fake.pydecimal(min_value=10, max_value=1000, right_digits=2)),
-                "image": fake.image_url(),
-                "created_at": datetime.now(timezone.utc), # datetime.now(timezone.utc).replace(tzinfo=None) # fake.date_time_between(start_date='-1y', end_date='now')
-                "updated_at": datetime.now(timezone.utc), # datetime.now(timezone.utc).replace(tzinfo=None) # fake.date_time_between(start_date='-1y', end_date='now')
-                "ip_address": fake.ipv4(),
-                "remark": fake.text()
-            }
-        }
 
 __all__ = [
     "BaseProduct"

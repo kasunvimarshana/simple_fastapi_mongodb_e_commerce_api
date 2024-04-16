@@ -71,7 +71,7 @@ class UserService:
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()
 
-                    return UserSchema.parse_obj(user_instance.dict(by_alias=True))
+                    return UserSchema.model_validate(user_instance.model_dump(by_alias=True))
                 except Exception as e:
                     # Rollback transaction if an error occurs
                     if not session.has_ended and session.in_transaction:
@@ -107,7 +107,7 @@ class UserService:
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()
 
-                    return UserSchema.parse_obj(user_instance.dict(by_alias=True))
+                    return UserSchema.model_validate(user_instance.model_dump(by_alias=True))
 
                     # return UserSchema()
                 except Exception as e:
@@ -138,7 +138,7 @@ class UserService:
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()
 
-                    return UserSchema.parse_obj(user_instance.dict(by_alias=True))
+                    return UserSchema.model_validate(user_instance.model_dump(by_alias=True))
                 except Exception as e:
                     # Rollback transaction if an error occurs
                     if not session.has_ended and session.in_transaction:
@@ -157,14 +157,13 @@ class UserService:
             self.logger.debug("read_user_by_id called")
             try:
                 user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(id))
-                # print(user_instance.dict())
-                # print("id ===== ", user_instance.id)
-                # print("_id ===== ", user_instance._id)
-                # await user_instance.fetch_all_links()
+                # =========
+                await user_instance.fetch_all_links()
+                # =========
                 if not user_instance:
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-                return UserSchema.parse_obj(user_instance.dict(by_alias=True))
+                return UserSchema.model_validate(user_instance.model_dump(by_alias=True))
             except Exception as e:
                 self.logger.exception("Error in read_user_by_id", e)
                 raise e
@@ -198,7 +197,7 @@ class UserService:
                         # length=user_read_request_schema_dict.get("limit", 0)
                     )
 
-                user_schema_list = [UserSchema.parse_obj(v.dict(by_alias=True)) for v in results]
+                user_schema_list = [UserSchema.model_validate(v.model_dump(by_alias=True)) for v in results]
                 return PaginateResponseSchema[List[UserSchema]](count=total_count, result=user_schema_list)
 
             except Exception as e:

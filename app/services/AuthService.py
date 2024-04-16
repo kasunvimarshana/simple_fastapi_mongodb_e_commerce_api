@@ -23,6 +23,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from beanie import PydanticObjectId
 from datetime import datetime, timezone
+from jose import jwt, JWTError
+from pydantic import ValidationError
 import app.configs.database as database
 from app.configs.Setting import Setting as Setting
 from app.utils.Logger import Logger as Logger
@@ -69,7 +71,7 @@ class AuthService:
                 if not self.security.verify_hashed_str(password, user_instance.password):
                     return None
 
-                return UserSchema.parse_obj(user_instance.dict(by_alias=True))
+                return UserSchema.model_validate(user_instance.model_dump(by_alias=True))
             except Exception as e:
                 self.logger.exception("Error in read_user_by_id", e)
                 raise e
@@ -98,7 +100,6 @@ class AuthService:
             self,
             current_user: Optional[Union[UserSchema, None]], 
         ) -> Optional[UserSchema]:
-            print("====== service ====", current_user)
             return current_user
 
     
@@ -110,7 +111,7 @@ class AuthService:
             try:
                 payload = self.security.decode_refresh_token(refresh_token)
                 token_data = TokenPayloadSchema(**payload)
-            except (jwt.JWTError, ValidationError):
+            except (JWTError, ValidationError):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Invalid token",

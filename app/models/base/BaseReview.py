@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, \
     List
 # import pymongo as pymongo
 from beanie import Document, Indexed, PydanticObjectId, Link, BackLink, before_event, after_event, Insert, Replace, Before, After
-from pydantic import BaseModel, ConfigDict, ValidationError, Field, AliasChoices
+from pydantic import Field
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 from bson import ObjectId
@@ -24,14 +24,13 @@ fake = Faker()
 class BaseReview(Document):
     # id: Optional[UUID] = Field(
     #         # default=None, 
-    #         alias="_id",
-    #         description="_id"
+    #         alias="id",
+    #         description="id"
     #         default_factory=uuid4
     #     )
     # id: Optional[PydanticObjectId] = Field(
     #         default=None, 
-    #         # alias="id",
-    #         validation_alias=AliasChoices("id", "_id"),
+    #         alias="id",
     #         description="id"
     #     )
     # user_id: Optional[PydanticObjectId] = Field(
@@ -131,32 +130,10 @@ class BaseReview(Document):
 
     class Settings:
         name = "reviews"
-        is_root = True
+        # is_root = True
         # max_nesting_depth = 1
         # max_nesting_depths_per_field = {}
 
-    class Config:
-        populate_by_name = True
-        arbitrary_types_allowed = True # required for the _id
-        use_enum_values = True
-        # json_encoders = {
-        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        # }
-        json_schema_extra = {
-            "example": {
-                "id": str(PydanticObjectId(str(ObjectId()))),
-                # "user_id": str(PydanticObjectId(str(ObjectId()))),
-                # "product_id": str(PydanticObjectId(str(ObjectId()))),
-                "rate_value": fake.random_int(min=0, max=10),
-                "comment": fake.text(),
-                "is_toxic_comment": fake.boolean(),
-                "created_at": datetime.now(timezone.utc), # datetime.now(timezone.utc).replace(tzinfo=None) # fake.date_time_between(start_date='-1y', end_date='now')
-                "updated_at": datetime.now(timezone.utc), # datetime.now(timezone.utc).replace(tzinfo=None) # fake.date_time_between(start_date='-1y', end_date='now')
-                "ip_address": fake.ipv4()
-            }
-        }
 
 __all__ = [
     "BaseReview"

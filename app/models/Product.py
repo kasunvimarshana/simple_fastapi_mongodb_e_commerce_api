@@ -32,27 +32,6 @@ class Product(BaseProduct):
             original_field="product"
         )
 
-    class Config(BaseProduct.Config):
-        base_product_schema = BaseProduct.Config.json_schema_extra["example"]
-        base_review_schema = BaseReview.Config.json_schema_extra["example"]
-        populate_by_name = True
-        arbitrary_types_allowed = True # required for the _id
-        use_enum_values = True
-        # json_encoders = {
-        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        # }
-        json_schema_extra = {
-            "example": {
-                **base_product_schema,
-                "reviews": [
-                    {
-                        **base_review_schema
-                    }
-                ]
-            }
-        }
 
 __all__ = [
     "Product"

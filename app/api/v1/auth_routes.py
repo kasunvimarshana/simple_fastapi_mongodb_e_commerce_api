@@ -60,7 +60,6 @@ async def test_token(
         current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=True)), 
     ) -> Optional[UserSchema]:
         response = await auth_controller.test_token(current_user)
-        print("====== api response ====", response)
         return response
 
 @router.post(

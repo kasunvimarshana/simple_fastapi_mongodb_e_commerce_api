@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, \
     Annotated, \
     Union, \
     List
-from pydantic import BaseModel, Field, ValidationError, condecimal, EmailStr
+from pydantic import BaseModel, Field, ValidationError, AliasChoices, condecimal
 from pydantic.json import pydantic_encoder
 from beanie import PydanticObjectId, BackLink
 # from datetime import datetime, timezone, timedelta

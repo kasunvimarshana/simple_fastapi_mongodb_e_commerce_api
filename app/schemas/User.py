@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, \
     Annotated, \
     Union, \
     List
-from pydantic import BaseModel, Field, ValidationError, condecimal
+from pydantic import BaseModel, Field, ValidationError, AliasChoices, condecimal
 from pydantic.json import pydantic_encoder
 from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
@@ -29,30 +29,26 @@ fake = Faker()
 
 class User(BaseUser):
     # pass
-    # carts: Optional[List[Union[BaseCart, dict, Any]]] = Field(
-    #         default=None, 
-    #         alias="carts",
-    #         description="carts", 
-    #         original_field="user"
-    #     )
-    # orders: Optional[List[Union[BaseOrder, dict, Any]]] = Field(
-    #         default=None, 
-    #         alias="orders",
-    #         description="orders", 
-    #         original_field="user"
-    #     )
-    # payments: Optional[List[Union[BasePayment, dict, Any]]] = Field(
-    #         default=None, 
-    #         alias="payments",
-    #         description="payments", 
-    #         original_field="user"
-    #     )
-    # reviews: Optional[List[Union[BaseReview, dict, Any]]] = Field(
-    #         default=None, 
-    #         alias="reviews",
-    #         description="reviews", 
-    #         original_field="user"
-    #     )
+    carts: Optional[List[Union[BaseCart, dict, Any]]] = Field(
+            default=None, 
+            alias="carts",
+            description="carts"
+        )
+    orders: Optional[List[Union[BaseOrder, dict, Any]]] = Field(
+            default=None, 
+            alias="orders",
+            description="orders"
+        )
+    payments: Optional[List[Union[BasePayment, dict, Any]]] = Field(
+            default=None, 
+            alias="payments",
+            description="payments"
+        )
+    reviews: Optional[List[Union[BaseReview, dict, Any]]] = Field(
+            default=None, 
+            alias="reviews",
+            description="reviews"
+        )
     
 
     class Config(BaseUser.Config):

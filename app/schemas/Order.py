@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, \
     Annotated, \
     Union, \
     List
-from pydantic import BaseModel, Field, ValidationError, condecimal
+from pydantic import BaseModel, Field, ValidationError, AliasChoices, condecimal
 from pydantic.json import pydantic_encoder
 from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
@@ -33,18 +33,16 @@ class Order(BaseOrder):
             alias="user",
             description="user"
         )
-    # order_items: Optional[List[Union[BaseOrderItem, dict, Any]]] = Field(
-    #         default=None, 
-    #         alias="order_items",
-    #         description="order_items", 
-    #         original_field="order"
-    #     )
-    # payments: Optional[List[Union[BasePayment, dict, Any]]] = Field(
-    #         default=None, 
-    #         alias="payments",
-    #         description="payments", 
-    #         original_field="order"
-    #     )
+    order_items: Optional[List[Union[BaseOrderItem, dict, Any]]] = Field(
+            default=None, 
+            alias="order_items",
+            description="order_items"
+        )
+    payments: Optional[List[Union[BasePayment, dict, Any]]] = Field(
+            default=None, 
+            alias="payments",
+            description="payments"
+        )
     
 
     class Config(BaseOrder.Config):

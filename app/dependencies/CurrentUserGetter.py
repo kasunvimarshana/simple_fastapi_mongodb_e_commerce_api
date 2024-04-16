@@ -75,7 +75,7 @@ class CurrentUserGetter:
                 )
 
             current_user = await UserModel.find_one(UserModel.id == PydanticObjectId(token_data.sub))
-            current_user = UserSchema.parse_obj(current_user.dict(by_alias=True))
+            current_user = UserSchema.model_validate(current_user.model_dump(by_alias=True))
 
             if not current_user:
                 raise HTTPException(
@@ -85,7 +85,7 @@ class CurrentUserGetter:
         except HTTPException as e:
             if self.is_required:
                 raise e
-        except (jwt.JWTError, ValidationError, Exception) as e:
+        except (JWTError, ValidationError, Exception) as e:
             if self.is_required:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,

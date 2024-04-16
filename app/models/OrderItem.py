@@ -37,29 +37,6 @@ class OrderItem(BaseOrderItem):
             description="product"
         )
 
-    class Config(BaseOrderItem.Config):
-        base_order_item_schema = BaseOrderItem.Config.json_schema_extra["example"]
-        base_order_schema = BaseOrder.Config.json_schema_extra["example"]
-        base_product_schema = BaseProduct.Config.json_schema_extra["example"]
-        populate_by_name = True
-        arbitrary_types_allowed = True # required for the _id
-        use_enum_values = True
-        # json_encoders = {
-        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        # }
-        json_schema_extra = {
-            "example": {
-                **base_order_item_schema,
-                "order": {
-                    **base_order_schema
-                },
-                "product": {
-                    **base_product_schema
-                }
-            }
-        }
 
 __all__ = [
     "OrderItem"

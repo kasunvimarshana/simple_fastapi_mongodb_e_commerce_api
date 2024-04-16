@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, \
     Annotated, \
     Union, \
     List
-from pydantic import BaseModel, Field, ValidationError, condecimal
+from pydantic import BaseModel, Field, ValidationError, AliasChoices, condecimal
 from pydantic.json import pydantic_encoder
 from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
@@ -24,9 +24,10 @@ fake = Faker()
 
 class BaseProduct(BaseModel):
     id: Optional[Union[PydanticObjectId, str]] = Field(
-            default=None,
-            alias="_id",
-            description="_id"
+            default=None, 
+            alias="id",
+            description="id",
+            validation_alias=AliasChoices('id', '_id')
         )
     sku: Optional[str] = Field(
             default=None, 

@@ -6,7 +6,7 @@
 # from decouple import config
 # import asyncio as asyncio
 # from typing import TYPE_CHECKING
-from pydantic import BaseModel, Field, ValidationError, condecimal
+from pydantic import BaseModel, Field, ValidationError, AliasChoices, condecimal
 # from pydantic.json import pydantic_encoder
 # from beanie import PydanticObjectId
 # from datetime import datetime, timezone, timedelta, date
