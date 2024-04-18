@@ -124,8 +124,6 @@ class UserService:
                     await session.commit_transaction()
 
                     return UserSchema.model_validate(user_instance.model_dump(by_alias=True))
-
-                    # return UserSchema()
                 except Exception as e:
                     # Rollback transaction if an error occurs
                     if not session.has_ended and session.in_transaction:
@@ -151,6 +149,8 @@ class UserService:
                                 # link_rule=DeleteRules.DELETE_LINKS, 
                                 session=session
                             )
+                        if user_instance.image is not None:
+                                self.file_handler.delete_file(user_instance.image)
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()
 

@@ -45,10 +45,10 @@ auth_controller = AuthController()
         dependencies=[]
     )
 async def login(
-        form_data: OAuth2PasswordRequestForm = Depends(), 
+        request_schema: OAuth2PasswordRequestForm = Depends(), 
         db: AsyncIOMotorDatabase = Depends(database.get_database)
     ) -> Optional[TokenSchema]:
-        response = await auth_controller.login(form_data, db)
+        response = await auth_controller.login(request_schema, db)
         return response
 
 @router.post(

@@ -42,7 +42,6 @@ user_controller = UserController()
 settings = Setting()
 
 
-# item: Item = Form(...), file: UploadFile = File(...)
 @router.post(
         "/users", 
         response_model=Optional[UserSchema], 
@@ -66,7 +65,7 @@ async def create_user(
     )
 async def update_user(
         id: str,
-        request_schema: UserCreateRequestSchema, 
+        request_schema: UserUpdateRequestSchema, 
         db: AsyncIOMotorDatabase = Depends(database.get_database), 
         current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
         client_ip: Optional[str] = Depends(ClientIPGetter())
@@ -96,12 +95,12 @@ async def delete_user(
         dependencies=[]
     )
 async def read_users(
-        user_read_request_schema: UserReadRequestSchema = Depends(UserReadRequestSchema),
+        request_schema: UserReadRequestSchema = Depends(UserReadRequestSchema),
         db: AsyncIOMotorDatabase = Depends(database.get_database), 
         current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
         client_ip: Optional[str] = Depends(ClientIPGetter())
     ) -> Optional[PaginateResponseSchema[List[UserSchema]]]:
-        response = await user_controller.read_users(user_read_request_schema, db, current_user, client_ip)
+        response = await user_controller.read_users(request_schema, db, current_user, client_ip)
         return response
 
 

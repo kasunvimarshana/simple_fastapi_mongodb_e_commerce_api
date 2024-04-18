@@ -24,8 +24,9 @@ from app.utils.Logger import Logger as Logger
 from app.configs.Setting import Setting as Setting
 # import routes
 from app.api.v1 import application_routes as application_routes
-from app.api.v1 import user_routes as user_routes
 from app.api.v1 import auth_routes as auth_routes
+from app.api.v1 import user_routes as user_routes
+from app.api.v1 import product_routes as product_routes
 # import models
 from app.models.User import User as UserModel
 from app.models.Review import Review as ReviewModel
@@ -161,6 +162,13 @@ app.include_router(
     user_routes.router,
     prefix=settings.API_ROUTE_PREFIX,
     tags=["user"]
+)
+
+# # # Product
+app.include_router(
+    product_routes.router,
+    prefix=settings.API_ROUTE_PREFIX,
+    tags=["product"]
 )
 
 

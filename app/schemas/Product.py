@@ -40,11 +40,12 @@ class Product(BaseProduct):
         populate_by_name = True
         arbitrary_types_allowed = True # required for the _id
         use_enum_values = True
-        # json_encoders = {
-        #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
-        #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-        #     # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-        # }
+        json_encoders = {
+            # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
+            # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
+            # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
+            Optional[List[Union[BaseReview, dict, Any]]]: lambda x: None,
+        }
         json_schema_extra = {
             "example": {
                 **base_product_schema,
