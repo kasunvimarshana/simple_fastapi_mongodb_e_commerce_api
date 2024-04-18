@@ -21,6 +21,7 @@ from beanie import PydanticObjectId, BackLink
 from faker import Faker
 from app.enums.UserRole import UserRole as UserRole
 from app.schemas.base.GeoObject import GeoObject
+from app.schemas.base.FileInput import FileInput
 
 fake = Faker()
 
@@ -50,7 +51,7 @@ class UserUpdateRequest(BaseModel):
             alias="phone_number",
             description="phone_number"
         )
-    image: Optional[str] = Field(
+    image: Optional[FileInput] = Field(
             default=None, 
             alias="image",
             description="image"
@@ -79,6 +80,7 @@ class UserUpdateRequest(BaseModel):
     class Config:
         # pass
         geo_object_schema = GeoObject.Config.json_schema_extra["example"]
+        file_input_schema = FileInput.Config.json_schema_extra["example"]
         populate_by_name = True
         arbitrary_types_allowed = True # required for the _id
         use_enum_values = True
@@ -94,7 +96,9 @@ class UserUpdateRequest(BaseModel):
                 "email": fake.email(),
                 "password": fake.password(),
                 "phone_number": fake.phone_number(),
-                "image": fake.image_url(),
+                "image": {
+                    **file_input_schema
+                },
                 "user_role": fake.random_element(elements=[role.value for role in UserRole]),
                 # "latitude": fake.latitude(),
                 # "longitude": fake.longitude(),

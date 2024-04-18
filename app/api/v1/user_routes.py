@@ -2,7 +2,7 @@
 # from __future__ import annotations
 # import logging as logging
 # import sys as sys
-# import os as os
+import os as os
 # import platform as platform
 # import psutil as psutil
 # from decouple import config
@@ -17,9 +17,11 @@ from typing import TYPE_CHECKING, \
     ForwardRef, \
     Annotated, \
     List
-from fastapi import APIRouter, Request, Depends, HTTPException, status, Body, Query
+from fastapi import FastAPI, APIRouter, Request, Depends, HTTPException, status, security, Query, Body, Form, File, UploadFile
+from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 # import pymongo as pymongo
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from pydantic import Json
 import app.configs.database as database
 from app.configs.Setting import Setting as Setting
 from app.utils.Logger import Logger as Logger
@@ -37,7 +39,10 @@ from app.dependencies.ClientIPGetter import ClientIPGetter as ClientIPGetter
 
 router = APIRouter()
 user_controller = UserController()
+settings = Setting()
 
+
+# item: Item = Form(...), file: UploadFile = File(...)
 @router.post(
         "/users", 
         response_model=Optional[UserSchema], 
@@ -116,6 +121,9 @@ async def read_user_by_id(
         return response
 
 
+
 __all__ = [
     "router"
 ]
+
+     

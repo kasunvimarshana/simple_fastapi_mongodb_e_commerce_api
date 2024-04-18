@@ -2,7 +2,7 @@
 # from __future__ import annotations
 # import logging as logging
 # import sys as sys
-# import os as os
+import os as os
 # import platform as platform
 # import psutil as psutil
 # from decouple import config
@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, \
     ForwardRef, \
     Annotated, \
     List
-from fastapi import APIRouter, Request, Depends, HTTPException, status, Body, Query
+from fastapi import FastAPI, APIRouter, Request, Depends, HTTPException, status, Body, Query
 import pymongo as pymongo
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from beanie import PydanticObjectId, MergeStrategy
@@ -27,6 +27,7 @@ import app.configs.database as database
 from app.configs.Setting import Setting as Setting
 from app.utils.Logger import Logger as Logger
 from app.utils.Security import Security as Security
+from app.utils.FileHandler import FileHandler as FileHandler
 # import models
 from app.models.User import User as UserModel
 from app.models.Review import Review as Review
@@ -41,6 +42,7 @@ class UserService:
     def __init__(self):
         self.settings = Setting()
         self.security = Security()
+        self.file_handler = FileHandler(self.settings.STATIC_IMAGE_FILES_DIRECTORY)
         self.logger = Logger(__name__)
 
 
@@ -55,7 +57,7 @@ class UserService:
             async with await db.client.start_session() as session:
                 try:
                     async with session.start_transaction():
-                        user_create_request_schema_dict = user_create_request_schema.dict(
+                        user_create_request_schema_dict = user_create_request_schema.model_dump(
                             exclude_unset=True,
                             # exclude_none=True
                         )
@@ -63,6 +65,10 @@ class UserService:
                         user_create_request_schema_dict["created_at"] = created_at
                         user_create_request_schema_dict["ip_address"] = client_ip
                         user_create_request_schema_dict["password"] = self.security.create_hashed_str(user_create_request_schema_dict["password"])
+                        if "image" in user_create_request_schema_dict and user_create_request_schema_dict.get("image") is not None:
+                            input_image = user_create_request_schema_dict.get("image")
+                            saved_image = self.file_handler.save_file_from_base64(input_image["content"], input_image["filename"])
+                            user_create_request_schema_dict["image"] = saved_image["filename"]
                         user_instance = UserModel(
                             **user_create_request_schema_dict
                         )
@@ -97,7 +103,7 @@ class UserService:
                         if not user_instance:
                             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-                        user_update_request_schema_dict = user_update_request_schema.dict(
+                        user_update_request_schema_dict = user_update_request_schema.model_dump(
                             exclude_unset=True,
                             # exclude_none=True
                         )
@@ -105,6 +111,14 @@ class UserService:
                         user_update_request_schema_dict["updated_at"] = updated_at
                         if "password" in user_update_request_schema_dict and user_update_request_schema_dict.get("password") is not None:
                             user_update_request_schema_dict["password"] = self.security.create_hashed_str(user_update_request_schema_dict["password"])
+
+                        if "image" in user_update_request_schema_dict and user_update_request_schema_dict.get("image") is not None:
+                            if user_instance.image is not None:
+                                self.file_handler.delete_file(user_instance.image)
+                            input_image = user_update_request_schema_dict.get("image")
+                            saved_image = self.file_handler.save_file_from_base64(input_image["content"], input_image["filename"])
+                            user_update_request_schema_dict["image"] = saved_image["filename"]
+
                         await user_instance.update({"$set": user_update_request_schema_dict}, session=session)
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()

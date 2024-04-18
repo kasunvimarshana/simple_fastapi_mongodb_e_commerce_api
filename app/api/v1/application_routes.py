@@ -17,7 +17,8 @@ from typing import TYPE_CHECKING, \
     ForwardRef, \
     Annotated, \
     List
-from fastapi import APIRouter, Request, Depends, HTTPException, status, Body, Query
+from fastapi import FastAPI, APIRouter, Request, Depends, HTTPException, status, security, Query, Body, Form, File, UploadFile
+from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse, FileResponse
 # import pymongo as pymongo
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 import app.configs.database as database
@@ -25,6 +26,7 @@ from app.configs.Setting import Setting as Setting
 from app.utils.Logger import Logger as Logger
 # import schemas
 from app.schemas.HealthResource import HealthResource as HealthResourceSchema
+from app.schemas.base.FileInput import FileInput as FileInputSchema
 # import controllers
 from app.controllers.ApplicationController import ApplicationController as ApplicationController
 
@@ -43,7 +45,34 @@ async def check_health(
         response = await application_controller.check_health(db)
         return response
 
+@router.post(
+        "/applications/encode-file", 
+        response_model=Optional[dict], 
+        status_code=status.HTTP_200_OK, 
+        dependencies=[]
+    )
+async def encode_file(
+        file: UploadFile = File(...)
+    ) -> Optional[dict]:
+        # pass
+        response = await application_controller.encode_file(file)
+        return response
+
+@router.post(
+        "/applications/decode-file", 
+        response_model=Any, 
+        status_code=status.HTTP_200_OK, 
+        dependencies=[]
+    )
+async def decode_file(
+        file: FileInputSchema
+    ) -> Optional[Any]:
+        # pass
+        response = await application_controller.decode_file(file)
+        return response
+
 
 __all__ = [
     "router"
 ]
+

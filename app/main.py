@@ -2,15 +2,16 @@
 # from __future__ import annotations
 # import logging as logging
 # import sys as sys
-# import os as os
+import os as os
+from pathlib import Path
 # from decouple import config
 # import asyncio as asyncio
 # from typing import TYPE_CHECKING
 from typing import TYPE_CHECKING, Optional, Any, Type, TypeVar, Generic, ForwardRef, Annotated, Union, List
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Depends, HTTPException, status, security
+from fastapi import FastAPI, Request, Depends, HTTPException, status, security, Query, Body, Form, File, UploadFile
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.openapi.utils import get_openapi
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,6 +47,14 @@ settings = Setting()
 # app = FastAPI(lifespan=lifespan)
 '''
 
+# Ensure the static directories exists
+'''
+# if not os.path.exists(settings.STATIC_FRONTEND_FILES_DIRECTORY):
+#     os.makedirs(settings.STATIC_FRONTEND_FILES_DIRECTORY)
+'''
+Path(settings.STATIC_FRONTEND_FILES_DIRECTORY).mkdir(parents=True, exist_ok=True)
+Path(settings.STATIC_IMAGE_FILES_DIRECTORY).mkdir(parents=True, exist_ok=True)
+
 app = FastAPI()
 
 # Middlewares
@@ -59,7 +68,8 @@ app.add_middleware(
 )
 
 # mounting static folder on serve for fetching static files
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+app.mount("/static", StaticFiles(directory=settings.STATIC_FRONTEND_FILES_DIRECTORY), name="static")
+app.mount("/images", StaticFiles(directory=settings.STATIC_IMAGE_FILES_DIRECTORY), name="images")
 
 async def connect_and_init_db():
     try:

@@ -70,6 +70,16 @@ class Setting(BaseSettings):
         default="/v1", 
         cast=lambda v: cast_or_default(v, str, v)
     )
+    STATIC_FRONTEND_FILES_DIRECTORY: Optional[str] = config(
+        "STATIC_FRONTEND_FILES_DIRECTORY", 
+        default="static", 
+        cast=lambda v: cast_or_default(v, str, v)
+    )
+    STATIC_IMAGE_FILES_DIRECTORY: Optional[str] = config(
+        "STATIC_IMAGE_FILES_DIRECTORY", 
+        default="images", 
+        cast=lambda v: cast_or_default(v, str, v)
+    )
     # BACKEND_CORS_ORIGINS: Optional[List[AnyHttpUrl]] = config(
     #     "BACKEND_CORS_ORIGINS", 
     #     default="http://localhost:3000", 

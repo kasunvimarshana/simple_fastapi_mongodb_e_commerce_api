@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, \
 # import pymongo as pymongo
 from beanie import Document, Indexed, PydanticObjectId, Link, BackLink, before_event, after_event, Insert, Replace, Before, After
 from pydantic import Field
+from pydantic.json import pydantic_encoder
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 from bson import ObjectId

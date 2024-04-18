@@ -23,17 +23,22 @@ from faker import Faker
 
 fake = Faker()
 
-class GeoObject(BaseModel):
-    type: str = Field(
-            default="Point", 
-            alias="type",
-            description="type"
+class FileInput(BaseModel):
+    content: str = Field(
+            default=None, 
+            alias="content",
+            description="content"
         )
-    coordinates: Tuple[float, float] = Field(
-            # default=None, 
-            alias="coordinates",
-            description="coordinates [If specifying latitude and longitude coordinates, list the longitude first, and then latitude.]"
+    filename: str = Field(
+            default=None, 
+            alias="filename",
+            description="filename"
         )
+    # content_type: str = Field(
+    #         default=None, 
+    #         alias="content_type",
+    #         description="content_type"
+    #     )
 
     class Config:
         # pass
@@ -47,13 +52,14 @@ class GeoObject(BaseModel):
         # }
         json_schema_extra = {
             "example": {
-                "type": "Point",
-                "coordinates": (float(fake.longitude()), float(fake.latitude()))
+                "content": "base64",
+                "filename": "str",
+                # "content_type": "str"
             }
         }
 
-# BaseReview.model_rebuild()
+# FileInput.model_rebuild()
 
 __all__ = [
-    "BaseReview"
+    "FileInput"
 ]
