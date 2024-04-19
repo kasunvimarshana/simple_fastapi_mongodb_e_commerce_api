@@ -12,8 +12,7 @@ from typing import TYPE_CHECKING, \
     ForwardRef, \
     Annotated, \
     Union, \
-    List, \
-    Tuple
+    List
 from pydantic import BaseModel, \
     dataclasses, \
     ConfigDict, \
@@ -29,35 +28,29 @@ from pydantic import BaseModel, \
     GetJsonSchemaHandler
 from pydantic.json import pydantic_encoder
 from beanie import PydanticObjectId, BackLink
-from datetime import datetime, timezone, timedelta
-# from decimal import Decimal
+# from datetime import datetime, timezone, timedelta
+from decimal import Decimal
 from faker import Faker
 
 fake = Faker()
 
-class FileInput(BaseModel):
-    content: str = Field(
+class ReviewUpdateRequest(BaseModel):
+    comment: Optional[str] = Field(
             default=None, 
-            alias="content",
-            description="content"
+            alias="comment",
+            description="comment"
         )
-    filename: str = Field(
+    product_id: Optional[str] = Field(
             default=None, 
-            alias="filename",
-            description="filename"
+            alias="product_id",
+            description="product_id"
         )
-    # content_type: str = Field(
-    #         default=None, 
-    #         alias="content_type",
-    #         description="content_type"
-    #     )
 
     class Config:
         # pass
         populate_by_name = True
         arbitrary_types_allowed = True # required for the _id
         use_enum_values = True
-        # from_attributes = True
         # json_encoders = {
         #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
         #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
@@ -65,14 +58,14 @@ class FileInput(BaseModel):
         # }
         json_schema_extra = {
             "example": {
-                "content": "base64",
-                "filename": "str",
-                # "content_type": "str"
+                "comment": fake.text(),
+                "product_id": str(fake.uuid4()),
             }
         }
 
-# FileInput.model_rebuild()
+# ReviewUpdateRequest.model_rebuild()
 
 __all__ = [
-    "FileInput"
+    "ReviewUpdateRequest"
 ]
+

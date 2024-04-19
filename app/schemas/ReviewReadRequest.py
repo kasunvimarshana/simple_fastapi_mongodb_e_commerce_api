@@ -28,66 +28,42 @@ from pydantic import BaseModel, \
     GetJsonSchemaHandler
 from pydantic.json import pydantic_encoder
 from beanie import PydanticObjectId, BackLink
-from datetime import datetime, timezone, timedelta
+# from datetime import datetime, timezone, timedelta
 # from decimal import Decimal
 from faker import Faker
+from .PaginateRequest import PaginateRequest
 
 fake = Faker()
 
-class BaseReview(BaseModel):
-    id: Optional[Union[PydanticObjectId, str]] = Field(
-            default=None, 
-            alias="id",
-            description="id",
-            validation_alias=AliasChoices('id', '_id')
-        )
-    # user_id: Optional[str] = Field(
-    #         default=None, 
-    #         alias="user_id",
-    #         description="user_id"
-    #     )
-    # product_id: Optional[str] = Field(
-    #         default=None, 
-    #         alias="product_id",
-    #         description="product_id"
-    #     )
+class ReviewReadRequest(PaginateRequest):
     rate_value: Optional[float] = Field(
             default=0, 
             alias="rate_value",
             description="rate_value"
-        )
-    comment: Optional[str] = Field(
-            default=None, 
-            alias="comment",
-            description="comment"
         )
     is_toxic_comment: Optional[bool] = Field(
             default=False, 
             alias="is_toxic_comment",
             description="is_toxic_comment"
         )
-    created_at: Optional[datetime] = Field(
+    user_id: Optional[str] = Field(
             default=None, 
-            alias="created_at",
-            description="created_at"
+            alias="user_id",
+            description="user_id"
         )
-    updated_at: Optional[datetime] = Field(
+    product_id: Optional[str] = Field(
             default=None, 
-            alias="updated_at",
-            description="updated_at"
+            alias="product_id",
+            description="product_id"
         )
-    ip_address: Optional[str] = Field(
-            default=None, 
-            alias="ip_address",
-            description="ip_address"
-        )
+    
 
     class Config:
         # pass
+        paginate_request_schema = PaginateRequest.Config.json_schema_extra["example"]
         populate_by_name = True
         arbitrary_types_allowed = True # required for the _id
         use_enum_values = True
-        # from_attributes = True
         # json_encoders = {
         #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
         #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
@@ -95,20 +71,16 @@ class BaseReview(BaseModel):
         # }
         json_schema_extra = {
             "example": {
-                "id": str(fake.uuid4()),
-                # "user_id": str(fake.uuid4()),
-                # "product_id": str(fake.uuid4()),
+                **paginate_request_schema,
                 "rate_value": fake.random_int(min=0, max=10),
-                "comment": fake.text(),
                 "is_toxic_comment": fake.boolean(),
-                "created_at": datetime.now(timezone.utc), # datetime.now(timezone.utc).replace(tzinfo=None) # fake.date_time_between(start_date='-1y', end_date='now')
-                "updated_at": datetime.now(timezone.utc), # datetime.now(timezone.utc).replace(tzinfo=None) # fake.date_time_between(start_date='-1y', end_date='now')
-                "ip_address": fake.ipv4()
+                "user_id": str(fake.uuid4()),
+                "product_id": str(fake.uuid4()),
             }
         }
 
-# BaseReview.model_rebuild()
+# ReviewReadRequest.model_rebuild()
 
 __all__ = [
-    "BaseReview"
+    "ReviewReadRequest"
 ]

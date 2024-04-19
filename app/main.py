@@ -27,6 +27,7 @@ from app.api.v1 import application_routes as application_routes
 from app.api.v1 import auth_routes as auth_routes
 from app.api.v1 import user_routes as user_routes
 from app.api.v1 import product_routes as product_routes
+from app.api.v1 import review_routes as review_routes
 # import models
 from app.models.User import User as UserModel
 from app.models.Review import Review as ReviewModel
@@ -80,12 +81,12 @@ async def connect_and_init_db():
             database=db,
             document_models= [
                 UserModel,
-                ReviewModel,
                 ProductModel,
-                PaymentModel,
-                OrderItemModel,
+                ReviewModel,
+                CartModel,
                 OrderModel,
-                CartModel
+                OrderItemModel,
+                PaymentModel
             ]
         )
         logging.debug("database initialized")
@@ -169,6 +170,13 @@ app.include_router(
     product_routes.router,
     prefix=settings.API_ROUTE_PREFIX,
     tags=["product"]
+)
+
+# # # Review
+app.include_router(
+    review_routes.router,
+    prefix=settings.API_ROUTE_PREFIX,
+    tags=["review"]
 )
 
 

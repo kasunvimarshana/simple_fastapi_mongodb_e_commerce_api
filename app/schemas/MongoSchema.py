@@ -6,7 +6,19 @@
 # from decouple import config
 # import asyncio as asyncio
 # from typing import TYPE_CHECKING
-from pydantic import BaseModel, Field, ValidationError, AliasChoices, condecimal
+from pydantic import BaseModel, \
+    dataclasses, \
+    ConfigDict, \
+    ValidationError, \
+    ValidationInfo, \
+    validator, \
+    field_validator, \
+    field_serializer, \
+    model_serializer, \
+    Field, \
+    AliasChoices, \
+    condecimal, \
+    GetJsonSchemaHandler
 # from pydantic.json import pydantic_encoder
 # from beanie import PydanticObjectId
 # from datetime import datetime, timezone, timedelta, date
@@ -27,7 +39,7 @@ class MongoSchema(BaseModel):
         exclude_unset = kwargs.pop("exclude_unset", True)
         by_alias = kwargs.pop("by_alias", True)
 
-        parsed = self.dict(
+        parsed = self.model_dump(
           exclude_unset=exclude_unset,
           by_alias=by_alias,
           **kwargs,

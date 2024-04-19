@@ -14,7 +14,19 @@ from typing import TYPE_CHECKING, \
     Union, \
     List, \
     Tuple
-from pydantic import BaseModel, Field, ValidationError, AliasChoices, condecimal
+from pydantic import BaseModel, \
+    dataclasses, \
+    ConfigDict, \
+    ValidationError, \
+    ValidationInfo, \
+    validator, \
+    field_validator, \
+    field_serializer, \
+    model_serializer, \
+    Field, \
+    AliasChoices, \
+    condecimal, \
+    GetJsonSchemaHandler
 from pydantic.json import pydantic_encoder
 from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
@@ -40,6 +52,7 @@ class GeoObject(BaseModel):
         populate_by_name = True
         arbitrary_types_allowed = True # required for the _id
         use_enum_values = True
+        # from_attributes = True
         # json_encoders = {
         #     # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
         #     # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,

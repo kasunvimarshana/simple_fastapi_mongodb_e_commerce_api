@@ -13,7 +13,19 @@ from typing import TYPE_CHECKING, \
     Annotated, \
     Union, \
     List
-from pydantic import BaseModel, Field, ValidationError, AliasChoices, condecimal
+from pydantic import BaseModel, \
+    dataclasses, \
+    ConfigDict, \
+    ValidationError, \
+    ValidationInfo, \
+    validator, \
+    field_validator, \
+    field_serializer, \
+    model_serializer, \
+    Field, \
+    AliasChoices, \
+    condecimal, \
+    GetJsonSchemaHandler
 from pydantic.json import pydantic_encoder
 from beanie import PydanticObjectId, BackLink
 from datetime import datetime, timezone, timedelta
@@ -64,11 +76,7 @@ class User(BaseUser):
         json_encoders = {
             # CustomType: lambda v: pydantic_encoder(v) if isinstance(v, CustomType) else None,
             # datetime: lambda v: v.isoformat() if isinstance(v, datetime) else None,
-            # BackLink: lambda x: None,  # Exclude BackLink fields from serialization
-            Optional[List[Union[BaseCart, dict, Any]]]: lambda x: None,
-            Optional[List[Union[BaseOrder, dict, Any]]]: lambda x: None,
-            Optional[List[Union[BasePayment, dict, Any]]]: lambda x: None,
-            Optional[List[Union[BaseReview, dict, Any]]]: lambda x: None,
+            BackLink: lambda x: None,  # Exclude BackLink fields from serialization
         }
         json_schema_extra = {
             "example": {

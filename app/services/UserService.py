@@ -191,7 +191,7 @@ class UserService:
             self.logger.debug("read_users called")
             try:
                 query = UserModel.find()
-                user_read_request_schema_dict = user_read_request_schema.dict(
+                user_read_request_schema_dict = user_read_request_schema.model_dump(
                             exclude_unset=True,
                             # exclude_none=True
                         )

@@ -30,7 +30,7 @@ class StudentModel(BaseModel):
     # but provided as `id` in the API requests and responses.
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: str = Field(...)
-    email: EmailStr = Field(...)
+    email: str = Field(...)
     course: str = Field(...)
     gpa: float = Field(..., le=4.0)
     model_config = ConfigDict(
@@ -56,7 +56,7 @@ class UpdateStudentModel(BaseModel):
     """
 
     name: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     course: Optional[str] = None
     gpa: Optional[float] = None
     model_config = ConfigDict(

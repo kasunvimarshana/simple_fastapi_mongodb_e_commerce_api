@@ -167,10 +167,9 @@ class ProductService:
         ) -> Optional[ProductSchema]:
             self.logger.debug("read_product_by_id called")
             try:
-                product_instance = await ProductSchema.find_one(operators.Eq(ProductSchema.id, PydanticObjectId(id)))
+                product_instance = await ProductModel.find_one(operators.Eq(ProductModel.id, PydanticObjectId(id)))
                 if not product_instance:
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-
                 return ProductSchema.model_validate(product_instance.model_dump(by_alias=True))
             except Exception as e:
                 self.logger.exception("Error in read_product_by_id", e)
@@ -185,8 +184,8 @@ class ProductService:
         ) -> Optional[PaginateResponseSchema[List[ProductSchema]]]:
             self.logger.debug("read_products called")
             try:
-                query = ProductSchema.find()
-                product_read_request_schema_dict = product_read_request_schema.dict(
+                query = ProductModel.find()
+                product_read_request_schema_dict = product_read_request_schema.model_dump(
                             exclude_unset=True,
                             # exclude_none=True
                         )

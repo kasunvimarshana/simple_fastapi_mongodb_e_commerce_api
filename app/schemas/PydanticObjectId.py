@@ -1,4 +1,16 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, \
+    dataclasses, \
+    ConfigDict, \
+    ValidationError, \
+    ValidationInfo, \
+    validator, \
+    field_validator, \
+    field_serializer, \
+    model_serializer, \
+    Field, \
+    AliasChoices, \
+    condecimal, \
+    GetJsonSchemaHandler
 from bson.objectid import ObjectId as BsonObjectId
 
 class PydanticObjectId(BsonObjectId):

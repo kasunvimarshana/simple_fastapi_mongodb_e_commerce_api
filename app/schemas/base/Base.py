@@ -14,7 +14,19 @@ from typing import TYPE_CHECKING, \
     Union, \
     List, \
     Dict
-from pydantic import BaseModel, Field, ValidationError, GetJsonSchemaHandler, condecimal
+from pydantic import BaseModel, \
+    dataclasses, \
+    ConfigDict, \
+    ValidationError, \
+    ValidationInfo, \
+    validator, \
+    field_validator, \
+    field_serializer, \
+    model_serializer, \
+    Field, \
+    AliasChoices, \
+    condecimal, \
+    GetJsonSchemaHandler
 from pydantic.json import pydantic_encoder
 from pydantic_core import CoreSchema
 from datetime import datetime, timezone, timedelta

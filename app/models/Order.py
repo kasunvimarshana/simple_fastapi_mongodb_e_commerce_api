@@ -12,7 +12,18 @@ from typing import TYPE_CHECKING, \
     List
 # import pymongo as pymongo
 from beanie import Document, Indexed, PydanticObjectId, Link, BackLink, before_event, after_event, Insert, Replace, Before, After
-from pydantic import Field
+from pydantic import BaseModel, \
+    dataclasses, \
+    ConfigDict, \
+    ValidationError, \
+    validator, \
+    field_validator, \
+    field_serializer, \
+    model_serializer, \
+    Field, \
+    AliasChoices, \
+    condecimal, \
+    GetJsonSchemaHandler
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 from bson import ObjectId
@@ -32,17 +43,17 @@ class Order(BaseOrder):
             alias="user",
             description="user"
         )
-    order_items: Optional[List[BackLink[BaseOrderItem]]] = Field(
-            default=None, 
-            alias="order_items",
-            description="order_items", 
-            original_field="order"
-        )
-    payments: Optional[List[BackLink[BasePayment]]] = Field(
-            default=None, 
-            description="payments", 
-            original_field="order"
-        )
+    # order_items: Optional[List[BackLink[BaseOrderItem]]] = Field(
+    #         default=None, 
+    #         alias="order_items",
+    #         description="order_items", 
+    #         original_field="order"
+    #     )
+    # payments: Optional[List[BackLink[BasePayment]]] = Field(
+    #         default=None, 
+    #         description="payments", 
+    #         original_field="order"
+    #     )
 
 
 __all__ = [

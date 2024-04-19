@@ -13,7 +13,19 @@ from typing import TYPE_CHECKING, \
     Annotated, \
     Union, \
     List
-from pydantic import BaseModel, Field, ValidationError, AliasChoices, condecimal, EmailStr
+from pydantic import BaseModel, \
+    dataclasses, \
+    ConfigDict, \
+    ValidationError, \
+    ValidationInfo, \
+    validator, \
+    field_validator, \
+    field_serializer, \
+    model_serializer, \
+    Field, \
+    AliasChoices, \
+    condecimal, \
+    GetJsonSchemaHandler
 from pydantic.json import pydantic_encoder
 from beanie import PydanticObjectId, BackLink
 # from datetime import datetime, timezone, timedelta

@@ -25,29 +25,29 @@ from app.configs.Setting import Setting as Setting
 from app.utils.Logger import Logger as Logger
 # import schemas
 from app.schemas.User import User as UserSchema
-from app.schemas.Product import Product as ProductSchema
-from app.schemas.ProductCreateRequest import ProductCreateRequest as ProductCreateRequestSchema
-from app.schemas.ProductUpdateRequest import ProductUpdateRequest as ProductUpdateRequestSchema
-from app.schemas.ProductReadRequest import ProductReadRequest as ProductReadRequestSchema
+from app.schemas.Review import Review as ReviewSchema
+from app.schemas.ReviewCreateRequest import ReviewCreateRequest as ReviewCreateRequestSchema
+from app.schemas.ReviewUpdateRequest import ReviewUpdateRequest as ReviewUpdateRequestSchema
+from app.schemas.ReviewReadRequest import ReviewReadRequest as ReviewReadRequestSchema
 from app.schemas.PaginateResponse import PaginateResponse as PaginateResponseSchema
 # import services
-from app.services.ProductService import ProductService as ProductService
+from app.services.ReviewService import ReviewService as ReviewService
 
-class ProductController:
+class ReviewController:
     def __init__(self):
         self.settings = Setting()
         self.logger = Logger(__name__)
-        self.product_service = ProductService()
+        self.review_service = ReviewService()
 
-    async def create_product(
+    async def create_review(
             self, 
-            product_create_request_schema: ProductCreateRequestSchema, 
+            review_create_request_schema: ReviewCreateRequestSchema, 
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[ProductSchema]:
+        ) -> Optional[ReviewSchema]:
         try:
-            temp_response = await self.product_service.create_product(product_create_request_schema, db, current_user, client_ip)
+            temp_response = await self.review_service.create_review(review_create_request_schema, db, current_user, client_ip)
             return temp_response
         except (HTTPException) as e:
             raise e
@@ -57,34 +57,16 @@ class ProductController:
                     detail=f"Internal Server Error: {str(e)}"
                 )
 
-    async def update_product(
-            self, 
-            id: str,
-            product_update_request_schema: ProductUpdateRequestSchema, 
-            db: AsyncIOMotorDatabase, 
-            current_user: Optional[Union[UserSchema, None]], 
-            client_ip: Optional[Union[str, None]]
-        ) -> Optional[ProductSchema]:
-        try:
-            temp_response = await self.product_service.update_product(id, product_update_request_schema, db, current_user, client_ip)
-            return temp_response
-        except (HTTPException) as e:
-            raise e
-        except Exception as e:
-            raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-                    detail=f"Internal Server Error: {str(e)}"
-                )
-
-    async def delete_product(
+    async def update_review(
             self, 
             id: str,
+            review_update_request_schema: ReviewUpdateRequestSchema, 
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[ProductSchema]:
+        ) -> Optional[ReviewSchema]:
         try:
-            temp_response = await self.product_service.delete_product(id, db, current_user, client_ip)
+            temp_response = await self.review_service.update_review(id, review_update_request_schema, db, current_user, client_ip)
             return temp_response
         except (HTTPException) as e:
             raise e
@@ -94,15 +76,15 @@ class ProductController:
                     detail=f"Internal Server Error: {str(e)}"
                 )
 
-    async def read_products(
+    async def delete_review(
             self, 
-            product_read_request_schema: ProductReadRequestSchema, 
+            id: str,
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[PaginateResponseSchema[List[ProductSchema]]]:
+        ) -> Optional[ReviewSchema]:
         try:
-            temp_response = await self.product_service.read_products(product_read_request_schema, db, current_user, client_ip)
+            temp_response = await self.review_service.delete_review(id, db, current_user, client_ip)
             return temp_response
         except (HTTPException) as e:
             raise e
@@ -112,15 +94,33 @@ class ProductController:
                     detail=f"Internal Server Error: {str(e)}"
                 )
 
-    async def read_product_by_id(
+    async def read_reviews(
+            self, 
+            review_read_request_schema: ReviewReadRequestSchema, 
+            db: AsyncIOMotorDatabase, 
+            current_user: Optional[Union[UserSchema, None]], 
+            client_ip: Optional[Union[str, None]]
+        ) -> Optional[PaginateResponseSchema[List[ReviewSchema]]]:
+        try:
+            temp_response = await self.review_service.read_reviews(review_read_request_schema, db, current_user, client_ip)
+            return temp_response
+        except (HTTPException) as e:
+            raise e
+        except Exception as e:
+            raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                    detail=f"Internal Server Error: {str(e)}"
+                )
+
+    async def read_review_by_id(
             self, 
             id: str, 
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[ProductSchema]:
+        ) -> Optional[ReviewSchema]:
         try:
-            temp_response = await self.product_service.read_product_by_id(id, db, current_user, client_ip)
+            temp_response = await self.review_service.read_review_by_id(id, db, current_user, client_ip)
             return temp_response
         except (HTTPException) as e:
             raise e
@@ -131,5 +131,5 @@ class ProductController:
                 )
 
 __all__ = [
-    "ProductController"
+    "ReviewController"
 ]
