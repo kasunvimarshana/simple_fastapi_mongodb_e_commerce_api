@@ -86,8 +86,7 @@ async def delete_review(
         current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
         client_ip: Optional[str] = Depends(ClientIPGetter())
     ) -> None:
-        response = await review_controller.delete_review(id, db, current_user, client_ip)
-        # return response
+        await review_controller.delete_review(id, db, current_user, client_ip)
 
 @router.get(
         "/reviews", 

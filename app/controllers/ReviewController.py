@@ -82,10 +82,9 @@ class ReviewController:
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[ReviewSchema]:
+        ) -> None:
         try:
-            temp_response = await self.review_service.delete_review(id, db, current_user, client_ip)
-            return temp_response
+            await self.review_service.delete_review(id, db, current_user, client_ip)
         except (HTTPException) as e:
             raise e
         except Exception as e:

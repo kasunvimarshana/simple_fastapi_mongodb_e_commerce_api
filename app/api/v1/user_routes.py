@@ -85,8 +85,7 @@ async def delete_user(
         current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
         client_ip: Optional[str] = Depends(ClientIPGetter())
     ) -> None:
-        response = await user_controller.delete_user(id, db, current_user, client_ip)
-        # return response
+        await user_controller.delete_user(id, db, current_user, client_ip)
 
 @router.get(
         "/users", 

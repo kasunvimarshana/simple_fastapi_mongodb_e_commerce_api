@@ -28,6 +28,9 @@ from app.api.v1 import auth_routes as auth_routes
 from app.api.v1 import user_routes as user_routes
 from app.api.v1 import product_routes as product_routes
 from app.api.v1 import review_routes as review_routes
+from app.api.v1 import cart_routes as cart_routes
+from app.api.v1 import order_routes as order_routes
+from app.api.v1 import payment_routes as payment_routes
 # import models
 from app.models.User import User as UserModel
 from app.models.Review import Review as ReviewModel
@@ -179,8 +182,28 @@ app.include_router(
     tags=["review"]
 )
 
+# # # Cart
+app.include_router(
+    cart_routes.router,
+    prefix=settings.API_ROUTE_PREFIX,
+    tags=["cart"]
+)
+
+# # # Order
+app.include_router(
+    order_routes.router,
+    prefix=settings.API_ROUTE_PREFIX,
+    tags=["order"]
+)
+
+# # # Payment
+app.include_router(
+    payment_routes.router,
+    prefix=settings.API_ROUTE_PREFIX,
+    tags=["payment"]
+)
+
 
 __all__ = [
     "app"
 ]
-

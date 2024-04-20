@@ -86,8 +86,7 @@ async def delete_product(
         current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
         client_ip: Optional[str] = Depends(ClientIPGetter())
     ) -> None:
-        response = await product_controller.delete_product(id, db, current_user, client_ip)
-        # return response
+        await product_controller.delete_product(id, db, current_user, client_ip)
 
 @router.get(
         "/products", 

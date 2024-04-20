@@ -82,10 +82,9 @@ class ProductController:
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[ProductSchema]:
+        ) -> None:
         try:
-            temp_response = await self.product_service.delete_product(id, db, current_user, client_ip)
-            return temp_response
+            await self.product_service.delete_product(id, db, current_user, client_ip)
         except (HTTPException) as e:
             raise e
         except Exception as e:

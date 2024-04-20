@@ -137,7 +137,7 @@ class UserService:
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[UserSchema]:
+        ) -> None:
             self.logger.debug("delete_user called")
             async with await db.client.start_session() as session:
                 try:
@@ -153,8 +153,7 @@ class UserService:
                                 self.file_handler.delete_file(user_instance.image)
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()
-
-                    return UserSchema.model_validate(user_instance.model_dump(by_alias=True))
+                    
                 except Exception as e:
                     # Rollback transaction if an error occurs
                     if not session.has_ended and session.in_transaction:
@@ -172,7 +171,7 @@ class UserService:
         ) -> Optional[UserSchema]:
             self.logger.debug("read_user_by_id called")
             try:
-                user_instance = await UserModel.find_one(operators.Eq(UserModel.id, PydanticObjectId(id)))
+                user_instance = await UserModel.find_one(operators.Eq(UserModel.id, PydanticObjectId(id)), fetch_links=True)
                 if not user_instance:
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
@@ -190,11 +189,32 @@ class UserService:
         ) -> Optional[PaginateResponseSchema[List[UserSchema]]]:
             self.logger.debug("read_users called")
             try:
-                query = UserModel.find()
+                query = UserModel.find(fetch_links=True)
                 user_read_request_schema_dict = user_read_request_schema.model_dump(
                             exclude_unset=True,
                             # exclude_none=True
                         )
+                
+                # Filter by first_name if provided
+                first_name_filter = user_read_request_schema_dict.get("first_name")
+                if first_name_filter:
+                    query = query.find(UserModel.first_name == first_name_filter)
+
+                # Filter by last_name if provided
+                last_name_filter = user_read_request_schema_dict.get("last_name")
+                if last_name_filter:
+                    query = query.find(UserModel.last_name == last_name_filter)
+
+                # Filter by email if provided
+                email_filter = user_read_request_schema_dict.get("email")
+                if email_filter:
+                    query = query.find(UserModel.email == email_filter)
+
+                # Filter by user_role if provided
+                user_role_filter = user_read_request_schema_dict.get("user_role")
+                if user_role_filter:
+                    query = query.find(UserModel.user_role == user_role_filter)
+
 
                 total_count = await query.count()
 

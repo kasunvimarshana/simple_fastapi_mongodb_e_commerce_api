@@ -146,7 +146,7 @@ class ReviewService:
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[ReviewSchema]:
+        ) -> None:
             self.logger.debug("delete_review called")
             async with await db.client.start_session() as session:
                 try:
@@ -161,7 +161,6 @@ class ReviewService:
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()
 
-                    return ReviewSchema.model_validate(review_instance.model_dump(by_alias=True))
                 except Exception as e:
                     # Rollback transaction if an error occurs
                     if not session.has_ended and session.in_transaction:
@@ -179,7 +178,7 @@ class ReviewService:
         ) -> Optional[ReviewSchema]:
             self.logger.debug("read_review_by_id called")
             try:
-                review_instance = await ReviewModel.find_one(operators.Eq(ReviewModel.id, PydanticObjectId(id)))
+                review_instance = await ReviewModel.find_one(operators.Eq(ReviewModel.id, PydanticObjectId(id)), fetch_links=True)
                 if not review_instance:
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
 
@@ -197,11 +196,32 @@ class ReviewService:
         ) -> Optional[PaginateResponseSchema[List[ReviewSchema]]]:
             self.logger.debug("read_reviews called")
             try:
-                query = ReviewModel.find()
+                query = ReviewModel.find(fetch_links=True)
                 review_read_request_schema_dict = review_read_request_schema.model_dump(
                             exclude_unset=True,
                             # exclude_none=True
                         )
+                
+                # Filter by rate_value if provided
+                rate_value_filter = review_read_request_schema_dict.get("rate_value")
+                if rate_value_filter:
+                    query = query.find(ReviewModel.rate_value == rate_value_filter)
+
+                # Filter by is_toxic_comment if provided
+                is_toxic_comment_filter = review_read_request_schema_dict.get("is_toxic_comment")
+                if is_toxic_comment_filter:
+                    query = query.find(ReviewModel.is_toxic_comment == is_toxic_comment_filter)
+
+                # Filter by user_id if provided
+                user_id_filter = review_read_request_schema_dict.get("user_id")
+                if user_id_filter:
+                    query = query.find(ReviewModel.user_id == user_id_filter)
+
+                # Filter by product_id if provided
+                product_id_filter = review_read_request_schema_dict.get("product_id")
+                if product_id_filter:
+                    query = query.find(ReviewModel.product_id == product_id_filter)
+                
 
                 total_count = await query.count()
 

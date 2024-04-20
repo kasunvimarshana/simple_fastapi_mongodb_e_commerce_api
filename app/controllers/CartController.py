@@ -25,28 +25,29 @@ from app.configs.Setting import Setting as Setting
 from app.utils.Logger import Logger as Logger
 # import schemas
 from app.schemas.User import User as UserSchema
-from app.schemas.UserCreateRequest import UserCreateRequest as UserCreateRequestSchema
-from app.schemas.UserUpdateRequest import UserUpdateRequest as UserUpdateRequestSchema
-from app.schemas.UserReadRequest import UserReadRequest as UserReadRequestSchema
+from app.schemas.Cart import Cart as CartSchema
+from app.schemas.CartItemCreateRequest import CartItemCreateRequest as CartItemCreateRequestSchema
+from app.schemas.CartItemUpdateRequest import CartItemUpdateRequest as CartItemUpdateRequestSchema
+from app.schemas.CartReadRequest import CartReadRequest as CartReadRequestSchema
 from app.schemas.PaginateResponse import PaginateResponse as PaginateResponseSchema
 # import services
-from app.services.UserService import UserService as UserService
+from app.services.CartService import CartService as CartService
 
-class UserController:
+class CartController:
     def __init__(self):
         self.settings = Setting()
         self.logger = Logger(__name__)
-        self.user_service = UserService()
+        self.cart_service = CartService()
 
-    async def create_user(
+    async def create_cart_item(
             self, 
-            user_create_request_schema: UserCreateRequestSchema, 
+            cart_item_create_request_schema: CartItemCreateRequestSchema, 
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[UserSchema]:
+        ) -> Optional[CartSchema]:
         try:
-            temp_response = await self.user_service.create_user(user_create_request_schema, db, current_user, client_ip)
+            temp_response = await self.cart_service.create_cart_item(cart_item_create_request_schema, db, current_user, client_ip)
             return temp_response
         except (HTTPException) as e:
             raise e
@@ -56,16 +57,16 @@ class UserController:
                     detail=f"Internal Server Error: {str(e)}"
                 )
 
-    async def update_user(
+    async def update_cart_item(
             self, 
             id: str,
-            user_update_request_schema: UserUpdateRequestSchema, 
+            cart_item_update_request_schema: CartItemUpdateRequestSchema, 
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[UserSchema]:
+        ) -> Optional[CartSchema]:
         try:
-            temp_response = await self.user_service.update_user(id, user_update_request_schema, db, current_user, client_ip)
+            temp_response = await self.cart_service.update_cart_item(id, cart_item_update_request_schema, db, current_user, client_ip)
             return temp_response
         except (HTTPException) as e:
             raise e
@@ -75,7 +76,7 @@ class UserController:
                     detail=f"Internal Server Error: {str(e)}"
                 )
 
-    async def delete_user(
+    async def delete_cart_item(
             self, 
             id: str,
             db: AsyncIOMotorDatabase, 
@@ -83,7 +84,7 @@ class UserController:
             client_ip: Optional[Union[str, None]]
         ) -> None:
         try:
-            await self.user_service.delete_user(id, db, current_user, client_ip)
+            await self.cart_service.delete_cart_item(id, db, current_user, client_ip)
         except (HTTPException) as e:
             raise e
         except Exception as e:
@@ -92,15 +93,15 @@ class UserController:
                     detail=f"Internal Server Error: {str(e)}"
                 )
 
-    async def read_users(
+    async def read_cart(
             self, 
-            user_read_request_schema: UserReadRequestSchema, 
+            cart_read_request_schema: CartReadRequestSchema, 
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[PaginateResponseSchema[List[UserSchema]]]:
+        ) -> Optional[PaginateResponseSchema[List[CartSchema]]]:
         try:
-            temp_response = await self.user_service.read_users(user_read_request_schema, db, current_user, client_ip)
+            temp_response = await self.cart_service.read_cart(cart_read_request_schema, db, current_user, client_ip)
             return temp_response
         except (HTTPException) as e:
             raise e
@@ -110,16 +111,32 @@ class UserController:
                     detail=f"Internal Server Error: {str(e)}"
                 )
 
-    async def read_user_by_id(
+    async def read_cart_item_by_id(
             self, 
-            id: str, 
+            id: str,
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[UserSchema]:
+        ) -> Optional[CartSchema]:
         try:
-            temp_response = await self.user_service.read_user_by_id(id, db, current_user, client_ip)
+            temp_response = await self.cart_service.read_cart_item_by_id(id, db, current_user, client_ip)
             return temp_response
+        except (HTTPException) as e:
+            raise e
+        except Exception as e:
+            raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                    detail=f"Internal Server Error: {str(e)}"
+                )
+        
+    async def delete_cart(
+            self, 
+            db: AsyncIOMotorDatabase, 
+            current_user: Optional[Union[UserSchema, None]], 
+            client_ip: Optional[Union[str, None]]
+        ) -> None:
+        try:
+            await self.cart_service.delete_cart(db, current_user, client_ip)
         except (HTTPException) as e:
             raise e
         except Exception as e:
@@ -129,5 +146,5 @@ class UserController:
                 )
 
 __all__ = [
-    "UserController"
+    "CartController"
 ]

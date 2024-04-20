@@ -132,7 +132,7 @@ class ProductService:
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
-        ) -> Optional[ProductSchema]:
+        ) -> None:
             self.logger.debug("delete_product called")
             async with await db.client.start_session() as session:
                 try:
@@ -149,7 +149,6 @@ class ProductService:
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()
 
-                    return ProductSchema.model_validate(product_instance.model_dump(by_alias=True))
                 except Exception as e:
                     # Rollback transaction if an error occurs
                     if not session.has_ended and session.in_transaction:
@@ -167,7 +166,7 @@ class ProductService:
         ) -> Optional[ProductSchema]:
             self.logger.debug("read_product_by_id called")
             try:
-                product_instance = await ProductModel.find_one(operators.Eq(ProductModel.id, PydanticObjectId(id)))
+                product_instance = await ProductModel.find_one(operators.Eq(ProductModel.id, PydanticObjectId(id)), fetch_links=True)
                 if not product_instance:
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
                 return ProductSchema.model_validate(product_instance.model_dump(by_alias=True))
@@ -184,11 +183,22 @@ class ProductService:
         ) -> Optional[PaginateResponseSchema[List[ProductSchema]]]:
             self.logger.debug("read_products called")
             try:
-                query = ProductModel.find()
+                query = ProductModel.find(fetch_links=True)
+
                 product_read_request_schema_dict = product_read_request_schema.model_dump(
                             exclude_unset=True,
                             # exclude_none=True
                         )
+
+                # Filter by SKU if provided
+                sku_filter = product_read_request_schema_dict.get("sku")
+                if sku_filter:
+                    query = query.find(ProductModel.sku == sku_filter)
+
+                # Filter by name if provided
+                name_filter = product_read_request_schema_dict.get("name")
+                if name_filter:
+                    query = query.find(ProductModel.name == name_filter)
 
                 total_count = await query.count()
 
@@ -198,7 +208,7 @@ class ProductService:
                         ).limit(
                             product_read_request_schema_dict.get("limit", 0)
                         )
-
+                    
                 
                 results = await query.to_list(
                         # length=product_read_request_schema_dict.get("limit", 0)
