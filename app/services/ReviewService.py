@@ -215,12 +215,12 @@ class ReviewService:
                 # Filter by user_id if provided
                 user_id_filter = review_read_request_schema_dict.get("user_id")
                 if user_id_filter:
-                    query = query.find(ReviewModel.user_id == user_id_filter)
+                    query = query.find(ReviewModel.user.id == user_id_filter, fetch_links=True)
 
                 # Filter by product_id if provided
                 product_id_filter = review_read_request_schema_dict.get("product_id")
                 if product_id_filter:
-                    query = query.find(ReviewModel.product_id == product_id_filter)
+                    query = query.find(ReviewModel.product.id == product_id_filter, fetch_links=True)
                 
 
                 total_count = await query.count()

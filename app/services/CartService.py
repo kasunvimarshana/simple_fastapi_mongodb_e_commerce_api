@@ -220,7 +220,29 @@ class CartService:
                 
                 # Filter by user.id if provided
                 if current_user is not None:
-                    query = query.find(CartModel.user.id == PydanticObjectId(current_user.id))
+                    query = query.find(CartModel.user.id == PydanticObjectId(current_user.id), fetch_links=True)
+
+                aggregation_pipeline = [
+                    {
+                        "$project": {
+                            "total": {
+                                "$multiply": ["$product.price", "$qty"]
+                            }
+                        }
+                    },
+                    {
+                        "$group": {
+                            "_id": None,
+                            "total": {"$sum": "$total"}
+                        }
+                    }
+                ]
+
+                cart_total_amount_list = await query.aggregate(
+                    aggregation_pipeline
+                ).to_list(length=1)
+
+                cart_total_amount = cart_total_amount_list[0].get("total") if len(cart_total_amount_list) > 0 else None
 
                 total_count = await query.count()
 
@@ -234,9 +256,9 @@ class CartService:
                 results = await query.to_list(
                         # length=cart_read_request_schema_dict.get("limit", 0)
                     )
-
+                
                 product_schema_list = [CartSchema.model_validate(v.model_dump(by_alias=True)) for v in results]
-                return PaginateResponseSchema[List[CartSchema]](count=total_count, result=product_schema_list)
+                return PaginateResponseSchema[List[CartSchema]](count=total_count, result=product_schema_list, metadata=dict(cart_total_amount = cart_total_amount))
 
             except Exception as e:
                 self.logger.exception("Error in read_reviews", e)
@@ -273,6 +295,15 @@ class CartService:
                         await session.abort_transaction()
                     self.logger.exception("Error in delete_cart", e)
                     raise e
+
+    async def calculate_total_amount(self, cart_items: List[CartModel]) -> float:
+        total_amount = 0.0
+
+        for cart_item in cart_items:
+            if cart_item.product and cart_item.product.price is not None:
+                total_amount += cart_item.product.price * cart_item.qty
+
+        return total_amount
                 
 
 __all__ = [
