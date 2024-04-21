@@ -40,7 +40,7 @@ class CartItemCreateRequest(BaseModel):
             alias="product_id",
             description="product_id"
         )
-    qty: Optional[str] = Field(
+    qty: Optional[int] = Field(
             default=None, 
             alias="qty",
             description="qty"

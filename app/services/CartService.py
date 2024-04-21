@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, \
 from fastapi import FastAPI, APIRouter, Request, Depends, HTTPException, status, Body, Query
 import pymongo as pymongo
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from beanie import PydanticObjectId, MergeStrategy
+from beanie import PydanticObjectId, MergeStrategy, UpdateResponse
 from beanie import operators as operators
 from datetime import datetime, timezone
 import app.configs.database as database
@@ -62,6 +62,8 @@ class CartService:
                         created_at = datetime.now(tz=timezone.utc)
                         cart_item_create_request_schema_dict["created_at"] = created_at
                         cart_item_create_request_schema_dict["ip_address"] = client_ip
+                        user_instance: UserModel = None
+                        product_instance: ProductModel = None
                         if current_user is not None:
                              user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(current_user.id))
                              cart_item_create_request_schema_dict["user"] = user_instance
@@ -74,8 +76,33 @@ class CartService:
                             **cart_item_create_request_schema_dict
                         )
 
-                        # cart_instance = await CartModel.insert_one(cart_instance, session=session)
-                        cart_instance = await cart_instance.create(session=session)
+                        '''
+                        # # cart_instance = await CartModel.insert_one(cart_instance, session=session)
+                        # cart_instance = await cart_instance.create(session=session)
+                        '''
+
+                        '''
+                        # cart_instance = await CartModel.find_one(
+                        #     CartModel.user.id == user_instance.id,
+                        #     CartModel.product.id == product_instance.id
+                        # )
+
+                        # if cart_instance:
+                        #     await cart_instance.update(
+                        #         operators.Set({CartModel.qty: (cart_instance.qty + cart_item_create_request_schema_dict.get("qty", 0))})
+                        #     )
+                        # else:
+                        #     cart_instance = await CartModel(
+                        #         **cart_item_create_request_schema_dict
+                        #     ).create(session=session)
+                        '''
+
+                        cart_instance = await CartModel.find_one(CartModel.user.id == user_instance.id, CartModel.product.id == product_instance.id).upsert( 
+                            operators.Inc({CartModel.qty: cart_item_create_request_schema_dict.get("qty", 0)}), # operators.Set({CartModel.qty: cart_item_create_request_schema_dict.get("qty", 0)})
+                            on_insert=cart_instance,
+                            session=session,
+                            response_type=UpdateResponse.NEW_DOCUMENT
+                        )
 
                     # Commit transaction if everything succeeds
                     await session.commit_transaction()
@@ -193,7 +220,7 @@ class CartService:
                 
                 # Filter by user.id if provided
                 if current_user is not None:
-                    query = query.find(ProductModel.user.id == PydanticObjectId(current_user.id))
+                    query = query.find(CartModel.user.id == PydanticObjectId(current_user.id))
 
                 total_count = await query.count()
 
@@ -230,7 +257,7 @@ class CartService:
 
                         # Filter by user.id if provided
                         if current_user is not None:
-                            query = query.find(ProductModel.user.id == PydanticObjectId(current_user.id))
+                            query = query.find(CartModel.user.id == PydanticObjectId(current_user.id))
                         
                         await query.delete(
                             # link_rule=DeleteRules.DELETE_LINKS, 
