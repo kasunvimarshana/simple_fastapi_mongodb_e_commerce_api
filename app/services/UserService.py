@@ -215,6 +215,14 @@ class UserService:
                 if user_role_filter:
                     query = query.find(UserModel.user_role == user_role_filter)
 
+                '''
+                # # Filter by geo if provided
+                # latitude = user_read_request_schema_dict.get("latitude")
+                # longitude = user_read_request_schema_dict.get("longitude")
+                # min_distance = user_read_request_schema_dict.get("min_distance")
+                # if latitude and longitude and min_distance:
+                #     query = query.find(operators.Near(UserModel.geo, longitude, latitude, min_distance=min_distance), fetch_links=True)
+                '''
 
                 total_count = await query.count()
 
@@ -224,8 +232,13 @@ class UserService:
                         ).limit(
                             user_read_request_schema_dict.get("limit", 0)
                         )
+                    
+                query = query.sort(
+                    [
+                        (UserModel.id, pymongo.DESCENDING)
+                    ]
+                )
 
-                
                 results = await query.to_list(
                         # length=user_read_request_schema_dict.get("limit", 0)
                     )

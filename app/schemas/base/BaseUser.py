@@ -111,11 +111,6 @@ class BaseUser(BaseModel):
             description="ip_address"
         )
     
-    carts: Any = None
-    orders: Any = None
-    payments: Any = None
-    reviews: Any = None
-    
     # @field_validator("reviews", mode="before")
     # @classmethod
     # def convert_int_serial(cls, v):

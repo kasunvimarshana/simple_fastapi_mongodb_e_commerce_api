@@ -205,6 +205,11 @@ class PaymentService:
                             payment_read_request_schema_dict.get("limit", 0)
                         )
                     
+                query = query.sort(
+                    [
+                        (PaymentModel.id, pymongo.DESCENDING)
+                    ]
+                )
                 
                 results = await query.to_list(
                         # length=product_read_request_schema_dict.get("limit", 0)

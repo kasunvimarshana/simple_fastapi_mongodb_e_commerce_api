@@ -58,6 +58,21 @@ class UserReadRequest(PaginateRequest):
             alias="user_role",
             description="user_role"
         )
+    # latitude: Optional[float] = Field(
+    #         default=None, 
+    #         alias="latitude",
+    #         description="latitude"
+    #     ) # coordinate that specifies the north–south position of a point on the surface of the Earth or another celestial body. Latitude is given as an angle that ranges from −90° at the south pole to 90° at the north pole, with 0° at the Equator
+    # longitude: Optional[float] = Field(
+    #         default=None, 
+    #         alias="longitude",
+    #         description="longitude"
+    #     ) # geographic coordinate that specifies the east–west position of a point on the surface of the Earth, or another celestial body. It is an angular measurement, usually expressed in degrees and denoted by the Greek letter lambda
+    # min_distance: Optional[float] = Field(
+    #         default=None, 
+    #         alias="min_distance",
+    #         description="min_distance"
+    #     )
 
     class Config:
         # pass
@@ -76,7 +91,10 @@ class UserReadRequest(PaginateRequest):
                 "first_name": fake.first_name(),
                 "last_name": fake.last_name(),
                 "email": fake.email(),
-                "user_role": fake.random_element(elements=[role.value for role in UserRole])
+                "user_role": fake.random_element(elements=[role.value for role in UserRole]),
+                # "latitude": fake.latitude(),
+                # "longitude": fake.longitude(),
+                # "min_distance": float(fake.pydecimal(min_value=10, max_value=500, right_digits=0)),
             }
         }
 
