@@ -93,13 +93,13 @@ async def delete_cart_item(
         status_code=status.HTTP_200_OK, 
         dependencies=[]
     )
-async def read_cart(
+async def read_carts(
         request_schema: CartReadRequestSchema = Depends(CartReadRequestSchema),
         db: AsyncIOMotorDatabase = Depends(database.get_database), 
         current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
         client_ip: Optional[str] = Depends(ClientIPGetter())
     ) -> Optional[PaginateResponseSchema[List[CartSchema]]]:
-        response = await cart_controller.read_cart(request_schema, db, current_user, client_ip)
+        response = await cart_controller.read_carts(request_schema, db, current_user, client_ip)
         return response
 
 

@@ -67,13 +67,18 @@ class ReviewService:
                         created_at = datetime.now(tz=timezone.utc)
                         review_create_request_schema_dict["created_at"] = created_at
                         review_create_request_schema_dict["ip_address"] = client_ip
-                        if current_user is not None:
-                             user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(current_user.id))
-                             review_create_request_schema_dict["user"] = user_instance
-                        if "product_id" in review_create_request_schema_dict and review_create_request_schema_dict.get("product_id") is not None:
-                            product_id = review_create_request_schema_dict.get("product_id")
-                            product_instance = await ProductModel.find_one(ProductModel.id == PydanticObjectId(product_id))
-                            review_create_request_schema_dict["product"] = product_instance
+                        
+                        user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(current_user.id))
+                        if not user_instance:
+                            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+                        review_create_request_schema_dict["user"] = user_instance
+                        
+                        product_id = review_create_request_schema_dict.get("product_id")
+                        product_instance = await ProductModel.find_one(ProductModel.id == PydanticObjectId(product_id))
+                        if not product_instance:
+                            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+                        review_create_request_schema_dict["product"] = product_instance
+
                         rate_value, is_toxic_comment = self.comment_classifier.predict(review_create_request_schema_dict["comment"])
                         review_create_request_schema_dict["rate_value"] = rate_value
                         review_create_request_schema_dict["is_toxic_comment"] = is_toxic_comment
@@ -117,13 +122,18 @@ class ReviewService:
                         )
                         updated_at = datetime.now(tz=timezone.utc)
                         review_update_request_schema_dict["updated_at"] = updated_at
-                        if current_user is not None:
-                             user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(current_user.id))
-                             review_update_request_schema_dict["user"] = user_instance
-                        if "product_id" in review_update_request_schema_dict and review_update_request_schema_dict.get("product_id") is not None:
-                            product_id = review_update_request_schema_dict.get("product_id")
-                            product_instance = await ProductModel.find_one(ProductModel.id == PydanticObjectId(product_id))
-                            review_update_request_schema_dict["product"] = product_instance
+
+                        user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(current_user.id))
+                        if not user_instance:
+                            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+                        review_update_request_schema_dict["user"] = user_instance
+                        
+                        product_id = review_update_request_schema_dict.get("product_id")
+                        product_instance = await ProductModel.find_one(ProductModel.id == PydanticObjectId(product_id))
+                        if not product_instance:
+                            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+                        review_update_request_schema_dict["product"] = product_instance
+
                         rate_value, is_toxic_comment = self.comment_classifier.predict(review_update_request_schema_dict["comment"])
                         review_update_request_schema_dict["rate_value"] = rate_value
                         review_update_request_schema_dict["is_toxic_comment"] = is_toxic_comment
@@ -222,7 +232,6 @@ class ReviewService:
                 if product_id_filter:
                     query = query.find(ReviewModel.product.id == product_id_filter, fetch_links=True)
                 
-
                 total_count = await query.count()
 
                 if "paginate" in review_read_request_schema_dict and review_read_request_schema_dict.get("paginate") == True:
@@ -231,7 +240,6 @@ class ReviewService:
                         ).limit(
                             review_read_request_schema_dict.get("limit", 0)
                         )
-
                 
                 results = await query.to_list(
                         # length=review_read_request_schema_dict.get("limit", 0)

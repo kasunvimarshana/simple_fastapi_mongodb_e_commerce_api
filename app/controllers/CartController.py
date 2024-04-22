@@ -93,7 +93,7 @@ class CartController:
                     detail=f"Internal Server Error: {str(e)}"
                 )
 
-    async def read_cart(
+    async def read_carts(
             self, 
             cart_read_request_schema: CartReadRequestSchema, 
             db: AsyncIOMotorDatabase, 
@@ -101,7 +101,7 @@ class CartController:
             client_ip: Optional[Union[str, None]]
         ) -> Optional[PaginateResponseSchema[List[CartSchema]]]:
         try:
-            temp_response = await self.cart_service.read_cart(cart_read_request_schema, db, current_user, client_ip)
+            temp_response = await self.cart_service.read_carts(cart_read_request_schema, db, current_user, client_ip)
             return temp_response
         except (HTTPException) as e:
             raise e

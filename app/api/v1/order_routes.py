@@ -27,13 +27,98 @@ from app.configs.Setting import Setting as Setting
 from app.utils.Logger import Logger as Logger
 # import schemas
 from app.schemas.User import User as UserSchema
+from app.schemas.Order import Order as OrderSchema
+from app.schemas.OrderItem import OrderItem as OrderItemSchema
+from app.schemas.OrderCreateRequest import OrderCreateRequest as OrderCreateRequestSchema
+from app.schemas.OrderUpdateRequest import OrderUpdateRequest as OrderUpdateRequestSchema
+from app.schemas.OrderReadRequest import OrderReadRequest as OrderReadRequestSchema
+from app.schemas.OrderStatusUpdateRequest import OrderStatusUpdateRequest as OrderStatusUpdateRequestSchema
+from app.schemas.PaginateResponse import PaginateResponse as PaginateResponseSchema
 # import controllers
+from app.controllers.OrderController import OrderController as OrderController
 # import dependencies
 from app.dependencies.CurrentUserGetter import CurrentUserGetter as CurrentUserGetter
 from app.dependencies.ClientIPGetter import ClientIPGetter as ClientIPGetter
 
 router = APIRouter()
+order_controller = OrderController()
 settings = Setting()
+
+@router.post(
+        "/orders", 
+        response_model=Optional[OrderSchema], 
+        status_code=status.HTTP_201_CREATED, 
+        dependencies=[]
+    )
+async def create_order(
+        request_schema: OrderCreateRequestSchema, 
+        db: AsyncIOMotorDatabase = Depends(database.get_database), 
+        current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
+        client_ip: Optional[str] = Depends(ClientIPGetter())
+    ) -> Optional[OrderSchema]:
+        response = await order_controller.create_order(request_schema, db, current_user, client_ip)
+        return response
+
+@router.put(
+        "/orders/status/{id}", 
+        response_model=Optional[OrderSchema], 
+        status_code=status.HTTP_200_OK, 
+        dependencies=[]
+    )
+async def update_order_status(
+        id: str,
+        request_schema: OrderStatusUpdateRequestSchema,
+        db: AsyncIOMotorDatabase = Depends(database.get_database), 
+        current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
+        client_ip: Optional[str] = Depends(ClientIPGetter())
+    ) -> Optional[OrderSchema]:
+        response = await order_controller.update_order_status(id, request_schema, db, current_user, client_ip)
+        return response
+
+@router.delete(
+        "/orders/items/{id}", 
+        response_model=None, 
+        status_code=status.HTTP_204_NO_CONTENT, 
+        dependencies=[]
+    )
+async def delete_order(
+        id: str,
+        db: AsyncIOMotorDatabase = Depends(database.get_database), 
+        current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
+        client_ip: Optional[str] = Depends(ClientIPGetter())
+    ) -> None:
+        await order_controller.delete_order(id, db, current_user, client_ip)
+
+@router.get(
+        "/orders", 
+        response_model=Optional[PaginateResponseSchema[List[OrderSchema]]], 
+        status_code=status.HTTP_200_OK, 
+        dependencies=[]
+    )
+async def read_orders(
+        request_schema: OrderReadRequestSchema = Depends(OrderReadRequestSchema),
+        db: AsyncIOMotorDatabase = Depends(database.get_database), 
+        current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
+        client_ip: Optional[str] = Depends(ClientIPGetter())
+    ) -> Optional[PaginateResponseSchema[List[OrderSchema]]]:
+        response = await order_controller.read_orders(request_schema, db, current_user, client_ip)
+        return response
+
+@router.get(
+        "/orders/{id}", 
+        response_model=Optional[OrderSchema], 
+        status_code=status.HTTP_200_OK, 
+        dependencies=[]
+    )
+async def read_order_by_id(
+        id: str,
+        db: AsyncIOMotorDatabase = Depends(database.get_database), 
+        current_user: Optional[UserSchema] = Depends(CurrentUserGetter(is_required=False)), 
+        client_ip: Optional[str] = Depends(ClientIPGetter())
+    ) -> Optional[OrderSchema]:
+        response = await order_controller.read_order_by_id(id, db, current_user, client_ip)
+        return response
+
 
 
 __all__ = [

@@ -62,15 +62,17 @@ class CartService:
                         created_at = datetime.now(tz=timezone.utc)
                         cart_item_create_request_schema_dict["created_at"] = created_at
                         cart_item_create_request_schema_dict["ip_address"] = client_ip
-                        user_instance: UserModel = None
-                        product_instance: ProductModel = None
-                        if current_user is not None:
-                             user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(current_user.id))
-                             cart_item_create_request_schema_dict["user"] = user_instance
-                        if "product_id" in cart_item_create_request_schema_dict and cart_item_create_request_schema_dict.get("product_id") is not None:
-                            product_id = cart_item_create_request_schema_dict.get("product_id")
-                            product_instance = await ProductModel.find_one(ProductModel.id == PydanticObjectId(product_id))
-                            cart_item_create_request_schema_dict["product"] = product_instance
+                        
+                        user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(current_user.id))
+                        if not user_instance:
+                            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+                        cart_item_create_request_schema_dict["user"] = user_instance
+                        
+                        product_id = cart_item_create_request_schema_dict.get("product_id")
+                        product_instance = await ProductModel.find_one(ProductModel.id == PydanticObjectId(product_id))
+                        if not product_instance:
+                            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+                        cart_item_create_request_schema_dict["product"] = product_instance
                         
                         cart_instance = CartModel(
                             **cart_item_create_request_schema_dict
@@ -136,13 +138,17 @@ class CartService:
                         )
                         updated_at = datetime.now(tz=timezone.utc)
                         cart_item_update_request_schema_dict["updated_at"] = updated_at
-                        if current_user is not None:
-                             user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(current_user.id))
-                             cart_item_update_request_schema_dict["user"] = user_instance
-                        if "product_id" in cart_item_update_request_schema_dict and cart_item_update_request_schema_dict.get("product_id") is not None:
-                            product_id = cart_item_update_request_schema_dict.get("product_id")
-                            product_instance = await ProductModel.find_one(ProductModel.id == PydanticObjectId(product_id))
-                            cart_item_update_request_schema_dict["product"] = product_instance
+
+                        user_instance = await UserModel.find_one(UserModel.id == PydanticObjectId(current_user.id))
+                        if not user_instance:
+                            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+                        cart_item_update_request_schema_dict["user"] = user_instance
+                        
+                        product_id = cart_item_update_request_schema_dict.get("product_id")
+                        product_instance = await ProductModel.find_one(ProductModel.id == PydanticObjectId(product_id))
+                        if not product_instance:
+                            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+                        cart_item_update_request_schema_dict["product"] = product_instance
 
                         await cart_instance.update({"$set": cart_item_update_request_schema_dict}, session=session)
                     # Commit transaction if everything succeeds
@@ -203,14 +209,14 @@ class CartService:
                 self.logger.exception("Error in read_cart_item_by_id", e)
                 raise e
 
-    async def read_cart(
+    async def read_carts(
             self, 
             cart_read_request_schema: CartReadRequestSchema, 
             db: AsyncIOMotorDatabase, 
             current_user: Optional[Union[UserSchema, None]], 
             client_ip: Optional[Union[str, None]]
         ) -> Optional[PaginateResponseSchema[List[CartSchema]]]:
-            self.logger.debug("read_cart called")
+            self.logger.debug("read_carts called")
             try:
                 query = CartModel.find(fetch_links=True)
                 cart_read_request_schema_dict = cart_read_request_schema.model_dump(
@@ -218,31 +224,38 @@ class CartService:
                             # exclude_none=True
                         )
                 
-                # Filter by user.id if provided
-                if current_user is not None:
-                    query = query.find(CartModel.user.id == PydanticObjectId(current_user.id), fetch_links=True)
+                if not current_user:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+                
+                query = query.find(CartModel.user.id == PydanticObjectId(current_user.id), fetch_links=True)
 
-                aggregation_pipeline = [
-                    {
-                        "$project": {
-                            "total": {
-                                "$multiply": ["$product.price", "$qty"]
-                            }
-                        }
-                    },
-                    {
-                        "$group": {
-                            "_id": None,
-                            "total": {"$sum": "$total"}
-                        }
-                    }
-                ]
+                '''
+                # aggregation_pipeline = [
+                #     {
+                #         "$project": {
+                #             "total_amount": {
+                #                 "$multiply": ["$product.price", "$qty"]
+                #             }
+                #         }
+                #     },
+                #     {
+                #         "$group": {
+                #             "_id": None,
+                #             "total_cart_sum": {
+                #                 "$sum": "$total_amount"
+                #             }
+                #         }
+                #     }
+                # ]
 
-                cart_total_amount_list = await query.aggregate(
-                    aggregation_pipeline
-                ).to_list(length=1)
+                # cart_total_amount_list = await query.aggregate(
+                #     aggregation_pipeline
+                # ).to_list(length=1)
 
-                cart_total_amount = cart_total_amount_list[0].get("total") if len(cart_total_amount_list) > 0 else None
+                # cart_total_amount = cart_total_amount_list[0].get("total_cart_sum") if len(cart_total_amount_list) > 0 else None
+                '''
+
+                cart_total_amount = await self.calculate_cart_total_amount(await query.to_list())
 
                 total_count = await query.count()
 
@@ -261,7 +274,7 @@ class CartService:
                 return PaginateResponseSchema[List[CartSchema]](count=total_count, result=product_schema_list, metadata=dict(cart_total_amount = cart_total_amount))
 
             except Exception as e:
-                self.logger.exception("Error in read_reviews", e)
+                self.logger.exception("Error in read_carts", e)
                 raise e
 
 
@@ -277,9 +290,10 @@ class CartService:
                     async with session.start_transaction():
                         query = CartModel.find(fetch_links=False)
 
-                        # Filter by user.id if provided
-                        if current_user is not None:
-                            query = query.find(CartModel.user.id == PydanticObjectId(current_user.id))
+                        if not current_user:
+                            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+                        
+                        query = query.find(CartModel.user.id == PydanticObjectId(current_user.id))
                         
                         await query.delete(
                             # link_rule=DeleteRules.DELETE_LINKS, 
@@ -296,7 +310,7 @@ class CartService:
                     self.logger.exception("Error in delete_cart", e)
                     raise e
 
-    async def calculate_total_amount(self, cart_items: List[CartModel]) -> float:
+    async def calculate_cart_total_amount(self, cart_items: List[CartModel]) -> float:
         total_amount = 0.0
 
         for cart_item in cart_items:
