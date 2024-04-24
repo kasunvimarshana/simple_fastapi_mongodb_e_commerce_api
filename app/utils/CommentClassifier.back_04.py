@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report
 import joblib
 
 class CommentClassifier:
@@ -20,32 +20,31 @@ class CommentClassifier:
         y_rating_train = data["rating"]
         y_toxicity_train = data["toxicity"]
         
+        # Split data into train and validation sets
         x_train, x_val, y_rating_train, y_rating_val, y_toxicity_train, y_toxicity_val = \
             train_test_split(x_train, y_rating_train, y_toxicity_train, test_size=0.2, random_state=self.random_state)
 
+        # Transform comments to TF-IDF features
         x_train_tfidf = self.tfidf_vectorizer.fit_transform(x_train)
         x_val_tfidf = self.tfidf_vectorizer.transform(x_val)
 
+        # Hyperparameter tuning for rating model
         param_grid_rating = {'C': [0.1, 1, 10]}
         grid_search_rating = GridSearchCV(LogisticRegression(max_iter=1000, random_state=self.random_state), param_grid_rating, cv=5)
         grid_search_rating.fit(x_train_tfidf, y_rating_train)
         self.rating_model = grid_search_rating.best_estimator_
 
+        # Hyperparameter tuning for toxicity model
         param_grid_toxicity = {'C': [0.1, 1, 10]}
         grid_search_toxicity = GridSearchCV(LogisticRegression(max_iter=1000, random_state=self.random_state), param_grid_toxicity, cv=5)
         grid_search_toxicity.fit(x_train_tfidf, y_toxicity_train)
         self.toxicity_model = grid_search_toxicity.best_estimator_
 
-        # Evaluate models
-        rating_train_predictions = self.rating_model.predict(x_val_tfidf)
-        toxicity_train_predictions = self.toxicity_model.predict(x_val_tfidf)
-
-        # print("Rating Model Evaluation:")
-        # print(classification_report(y_rating_val, rating_train_predictions))
-        print("Rating Model Accuracy:", accuracy_score(y_rating_val, rating_train_predictions))
-        # print("Toxicity Model Evaluation:")
-        # print(classification_report(y_toxicity_val, toxicity_train_predictions))
-        print("Toxicity Model Accuracy:", accuracy_score(y_toxicity_val, toxicity_train_predictions))
+        # Evaluate models on validation set
+        print("Rating Model Evaluation:")
+        print(classification_report(y_rating_val, self.rating_model.predict(x_val_tfidf)))
+        print("Toxicity Model Evaluation:")
+        print(classification_report(y_toxicity_val, self.toxicity_model.predict(x_val_tfidf)))
     
     def predict(self, comment: str) -> tuple[int, bool]:
         comment_tfidf = self.tfidf_vectorizer.transform([comment])
