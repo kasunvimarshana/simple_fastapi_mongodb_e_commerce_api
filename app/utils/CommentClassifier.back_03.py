@@ -60,3 +60,7 @@ class CommentClassifier:
         self.rating_model = rating_model
         self.toxicity_model = toxicity_model
         return self
+
+__all__ = [
+    "CommentClassifier"
+]

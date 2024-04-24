@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import classification_report
-import joblib
+import joblib as joblib
 
 class CommentClassifier:
     def __init__(self):
@@ -61,3 +61,7 @@ class CommentClassifier:
         self.rating_model = rating_model
         self.toxicity_model = toxicity_model
         return self
+
+__all__ = [
+    "CommentClassifier"
+]
