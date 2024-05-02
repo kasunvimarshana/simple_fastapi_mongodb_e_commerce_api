@@ -4,6 +4,7 @@ annotated-types==0.6.0
 anyio==4.3.0
 bcrypt==4.1.2
 beanie==1.25.0
+certifi==2024.2.2
 click==8.1.7
 colorama==0.4.6
 dnspython==2.6.1
@@ -12,11 +13,14 @@ email_validator==2.1.1
 Faker==24.8.0
 fastapi==0.110.1
 h11==0.14.0
+httpcore==1.0.5
 httptools==0.6.1
+httpx==0.27.0
 idna==3.6
 imbalanced-learn==0.12.2
 imblearn==0.0
 importlib==1.0.4
+iniconfig==2.0.0
 iso8601==1.1.0
 Jinja2==3.1.3
 joblib==1.4.0
@@ -25,8 +29,10 @@ MarkupSafe==2.1.5
 motor==3.4.0
 nltk==3.8.1
 numpy==1.26.4
+packaging==24.0
 pandas==2.2.2
 passlib==1.7.4
+pluggy==1.5.0
 psutil==5.9.8
 pyasn1==0.6.0
 pydantic==2.6.4
@@ -34,6 +40,7 @@ pydantic-settings==2.2.1
 pydantic_core==2.16.3
 pymongo==4.6.3
 pypika-tortoise==0.1.6
+pytest==8.1.1
 python-dateutil==2.9.0.post0
 python-decouple==3.8
 python-dotenv==1.0.1
